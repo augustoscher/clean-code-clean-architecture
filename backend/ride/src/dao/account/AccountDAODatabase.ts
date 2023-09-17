@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 // resource - driven actor
 // adapter
-import Postgres from '../database/postgres'
+import Postgres from '../../database/postgres'
 import AccountDAO from './AccountDAO'
 
 export default class AccountDAODatabase implements AccountDAO {

@@ -1,7 +1,7 @@
-import AccountDAO from '../dao/AccountDAO'
+import AccountDAODatabase from '../dao/account/AccountDAODatabase'
 
-describe('AccountDAO', () => {
-  const accountDAO = new AccountDAO()
+describe('AccountDAODatabase', () => {
+  const accountDAO = new AccountDAODatabase()
 
   it('should create passenger account and get by id', async () => {
     const input = {

@@ -1,4 +1,5 @@
 import AccountService from '../AccountService'
+import AccountDAOMemory from '../dao/account/AccountDAOMemory'
 
 describe('AccountService', () => {
   test('Deve criar um passageiro', async function () {
@@ -95,5 +96,22 @@ describe('AccountService', () => {
     await expect(() => accountService.signup(input)).rejects.toThrow(
       new Error('Invalid plate')
     )
+  })
+
+  test('Deve criar um passageiro com fake', async function () {
+    const accountMemoryDAO = new AccountDAOMemory()
+    const input = {
+      name: 'John Doe',
+      email: `john.doe${Math.random()}@gmail.com`,
+      cpf: '95818705552',
+      isPassenger: true
+    }
+    const accountService = new AccountService(accountMemoryDAO)
+    const output = await accountService.signup(input)
+    const account = await accountService.getAccount(output.accountId)
+    expect(account.account_id).toBeDefined()
+    expect(account.name).toBe(input.name)
+    expect(account.email).toBe(input.email)
+    expect(account.cpf).toBe(input.cpf)
   })
 })
