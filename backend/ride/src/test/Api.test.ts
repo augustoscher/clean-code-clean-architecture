@@ -1,4 +1,5 @@
 //driver
+// TODO - mock the API
 describe('API', () => {
   const baseUrl = 'http://localhost:3000'
   const passengerInput = {
@@ -18,5 +19,19 @@ describe('API', () => {
     })
     const output = await response.json()
     expect(output.accountId).toBeDefined()
+    const responseAccount = await fetch(
+      `http://localhost:3000/accounts/${output.accountId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+    const outputAccount = await responseAccount.json()
+    expect(outputAccount.account_id).toBeDefined()
+    expect(outputAccount.name).toBe(passengerInput.name)
+    expect(outputAccount.email).toBe(passengerInput.email)
+    expect(outputAccount.cpf).toBe(passengerInput.cpf)
   })
 })
