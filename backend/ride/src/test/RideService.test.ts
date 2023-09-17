@@ -178,7 +178,22 @@ describe('RideService', () => {
     // Deve verificar se a corrida está em status "in_progress", se não estiver lançar um erro
     // Deve gerar o position_id
     // Deve salvar na tabela position: position_id, ride_id, lat, long e date
+    test('should update position when ride is in progress', async () => {})
+
+    test("shouldn't update position when ride is not in progress", async () => {})
   })
 
-  describe('finishRide', () => {})
+  describe('finishRide', () => {
+    // Deve verificar se a corrida está em status "in_progress", se não estiver lançar um erro
+    test("shouldn't allow finish ride when ride is not in progress", async () => {})
+
+    test('should calculate distance in km', async () => {})
+
+    test('should calculate fare', async () => {})
+
+    test('should finish ride and update status, distance and fare', async () => {})
+    // Deve obter todas as positions e calcular a distância entre cada uma delas, para isso utilize um algoritmo que receba duas coordenadas (lat, long) e retorne a distância entre elas em km.
+    // Com a distância total calculada, calcule o valor da corrida (fare) multiplicando a distância por 2,1
+    // Atualizar a corrida com o status "completed", a distância e o valor da corrida (fare)
+  })
 })
