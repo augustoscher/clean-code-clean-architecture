@@ -171,4 +171,10 @@ describe('RideService', () => {
       ).rejects.toThrow(new Error('Driver is already in another ride'))
     })
   })
+
+  describe('startRide', () => {})
+
+  describe('updatePosition', () => {})
+
+  describe('finishRide', () => {})
 })

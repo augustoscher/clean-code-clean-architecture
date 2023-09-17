@@ -77,6 +77,12 @@ export default class RideService {
     await this.rideDAO.update(ride)
   }
 
+  async startRide(rideId: string) {}
+
+  async updatePosition(rideId: string) {}
+
+  async finishRide(rideId: string) {}
+
   async getRide(rideId: string) {
     const ride = await this.rideDAO.getById(rideId)
     return ride
