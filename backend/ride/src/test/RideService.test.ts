@@ -40,7 +40,7 @@ describe('RideService', () => {
   describe('requestRide', () => {
     test('should allow a passenger to request ride', async () => {
       const input = {
-        accountId: passengerAccountId,
+        passengerId: passengerAccountId,
         from: { lat: 0, long: 0 },
         to: { lat: 0, long: 0 }
       }
@@ -51,32 +51,32 @@ describe('RideService', () => {
 
     test("shouldn't allow not a passenger to request ride", async () => {
       const input = {
-        accountId: driverAccountId,
+        passengerId: driverAccountId,
         from: { lat: 0, long: 0 },
         to: { lat: 0, long: 0 }
       }
       const rideService = new RideService()
       await expect(() => rideService.requestRide(input)).rejects.toThrow(
-        new Error('Only passengers can request rides')
+        new Error('Account is not from a passenger')
       )
     })
 
     test("shouldn't allow request new ride if passenger already have an uncompleted ride", async () => {
       const input = {
-        accountId: passengerAccountId,
+        passengerId: passengerAccountId,
         from: { lat: 0, long: 0 },
         to: { lat: 0, long: 0 }
       }
       const rideService = new RideService()
       await rideService.requestRide(input)
       await expect(() => rideService.requestRide(input)).rejects.toThrow(
-        new Error('Passenger already have an uncompleted ride')
+        new Error('This passenger already has an active ride')
       )
     })
 
     test('should set status as "requested"', async () => {
       const input = {
-        accountId: passengerAccountId,
+        passengerId: passengerAccountId,
         from: { lat: 0, long: 0 },
         to: { lat: 0, long: 0 }
       }
@@ -90,7 +90,7 @@ describe('RideService', () => {
   describe('acceptRide', () => {
     it('should allow a driver to accept a ride', async () => {
       const input = {
-        accountId: passengerAccountId,
+        passengerId: passengerAccountId,
         from: { lat: 0, long: 0 },
         to: { lat: 0, long: 0 }
       }
@@ -104,7 +104,7 @@ describe('RideService', () => {
 
     it("shouldn't allow passenger to accept a ride", async () => {
       const input = {
-        accountId: passengerAccountId,
+        passengerId: passengerAccountId,
         from: { lat: 0, long: 0 },
         to: { lat: 0, long: 0 }
       }
@@ -117,7 +117,7 @@ describe('RideService', () => {
 
     it("shouldn't allow a driver to accept a ride if status isn't 'requested'", async () => {
       const input = {
-        accountId: passengerAccountId,
+        passengerId: passengerAccountId,
         from: { lat: 0, long: 0 },
         to: { lat: 0, long: 0 }
       }
@@ -134,9 +134,7 @@ describe('RideService', () => {
       }
       await expect(() =>
         rideService.acceptRide({ driverId: driverAccountId, rideId })
-      ).rejects.toThrow(
-        new Error('Only rides with status requested can be accepted')
-      )
+      ).rejects.toThrow(new Error('The ride is not requested'))
     })
 
     it("shouldn't allow a driver to accept a ride if driver already have another ride with status 'accepted' or 'in_progress'", async () => {
@@ -147,12 +145,12 @@ describe('RideService', () => {
         isPassenger: true
       })
       const firstRideInput = {
-        accountId: passengerAccountId,
+        passengerId: passengerAccountId,
         from: { lat: 0, long: 0 },
         to: { lat: 0, long: 0 }
       }
       const secondRideInput = {
-        accountId: newPassengerId,
+        passengerId: newPassengerId,
         from: { lat: 0, long: 0 },
         to: { lat: 0, long: 0 }
       }
@@ -170,7 +168,7 @@ describe('RideService', () => {
           driverId: driverAccountId,
           rideId: secondRideId
         })
-      ).rejects.toThrow(new Error('Driver already have an uncompleted ride'))
+      ).rejects.toThrow(new Error('Driver is already in another ride'))
     })
   })
 })

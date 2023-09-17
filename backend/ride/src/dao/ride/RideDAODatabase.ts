@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // resource - driven actor
 // adapter
-// import AccountDAO from '../account/AccountDAO'
 import Postgres from '../../database/postgres'
 import RideDAO from './RideDAO'
 
@@ -58,7 +57,7 @@ export default class RideDAODatabase implements RideDAO {
     const connection = Postgres.getConnection()
     try {
       const ridesData = await connection.query(
-        "select * from cccat13.ride where passenger_id = $1 and status in ('requested', 'accepted', 'in_progress')",
+        "select * from cccat13.ride where passenger_id = $1 and status in ('REQUESTED', 'ACCEPTED', 'IN_PROGRESS')",
         [passengerId]
       )
       return ridesData
@@ -71,7 +70,7 @@ export default class RideDAODatabase implements RideDAO {
     const connection = Postgres.getConnection()
     try {
       const ridesData = await connection.query(
-        "select * from cccat13.ride where driver_id = $1 and status in ('accepted', 'in_progress')",
+        "select * from cccat13.ride where driver_id = $1 and status in ('ACCEPTED', 'IN_PROGRESS')",
         [driverId]
       )
       return ridesData
