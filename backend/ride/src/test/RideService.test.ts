@@ -146,9 +146,16 @@ describe('RideService', () => {
     })
   })
 
-  describe('startRide', () => {})
+  describe('startRide', () => {
+    // Deve verificar se a corrida está em status "accepted", se não estiver lançar um erro
+    // Deve modificar o status da corrida para "in_progress"
+  })
 
-  describe('updatePosition', () => {})
+  describe('updatePosition', () => {
+    // Deve verificar se a corrida está em status "in_progress", se não estiver lançar um erro
+    // Deve gerar o position_id
+    // Deve salvar na tabela position: position_id, ride_id, lat, long e date
+  })
 
   describe('finishRide', () => {})
 })

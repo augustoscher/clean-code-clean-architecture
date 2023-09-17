@@ -19,6 +19,11 @@ export type AcceptRideParams = {
   driverId: string
   rideId: string
 }
+export type UpdatePositionParams = {
+  rideId: string
+  lat: number
+  long: number
+}
 
 export enum RideStatus {
   Requested = 'REQUESTED',
@@ -79,7 +84,7 @@ export default class RideService {
 
   async startRide(rideId: string) {}
 
-  async updatePosition(rideId: string) {}
+  async updatePosition({ rideId, lat, long }: UpdatePositionParams) {}
 
   async finishRide(rideId: string) {}
 
