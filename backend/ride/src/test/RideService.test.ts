@@ -12,6 +12,12 @@ describe('RideService', () => {
   let passengerAccountId: string
   let driverAccountId: string
 
+  const getPassengerInput = (passengerId: string) => ({
+    passengerId,
+    from: { lat: 0, long: 0 },
+    to: { lat: 0, long: 0 }
+  })
+
   beforeAll(async () => {
     const { accountId: passengerId } = await createAccount({
       name: 'John Doe',
@@ -39,11 +45,7 @@ describe('RideService', () => {
 
   describe('requestRide', () => {
     test('should allow a passenger to request ride', async () => {
-      const input = {
-        passengerId: passengerAccountId,
-        from: { lat: 0, long: 0 },
-        to: { lat: 0, long: 0 }
-      }
+      const input = getPassengerInput(passengerAccountId)
       const rideService = new RideService()
       const output = await rideService.requestRide(input)
       expect(output.rideId).toBeDefined()
@@ -62,11 +64,7 @@ describe('RideService', () => {
     })
 
     test("shouldn't allow request new ride if passenger already have an uncompleted ride", async () => {
-      const input = {
-        passengerId: passengerAccountId,
-        from: { lat: 0, long: 0 },
-        to: { lat: 0, long: 0 }
-      }
+      const input = getPassengerInput(passengerAccountId)
       const rideService = new RideService()
       await rideService.requestRide(input)
       await expect(() => rideService.requestRide(input)).rejects.toThrow(
@@ -75,11 +73,7 @@ describe('RideService', () => {
     })
 
     test('should set status as "requested"', async () => {
-      const input = {
-        passengerId: passengerAccountId,
-        from: { lat: 0, long: 0 },
-        to: { lat: 0, long: 0 }
-      }
+      const input = getPassengerInput(passengerAccountId)
       const rideService = new RideService()
       const output = await rideService.requestRide(input)
       const ride = await rideService.getRide(output.rideId)
@@ -89,11 +83,7 @@ describe('RideService', () => {
 
   describe('acceptRide', () => {
     it('should allow a driver to accept a ride', async () => {
-      const input = {
-        passengerId: passengerAccountId,
-        from: { lat: 0, long: 0 },
-        to: { lat: 0, long: 0 }
-      }
+      const input = getPassengerInput(passengerAccountId)
       const rideService = new RideService()
       const { rideId } = await rideService.requestRide(input)
       await rideService.acceptRide({ driverId: driverAccountId, rideId })
@@ -103,11 +93,7 @@ describe('RideService', () => {
     })
 
     it("shouldn't allow passenger to accept a ride", async () => {
-      const input = {
-        passengerId: passengerAccountId,
-        from: { lat: 0, long: 0 },
-        to: { lat: 0, long: 0 }
-      }
+      const input = getPassengerInput(passengerAccountId)
       const rideService = new RideService()
       const { rideId } = await rideService.requestRide(input)
       await expect(() =>
@@ -116,11 +102,7 @@ describe('RideService', () => {
     })
 
     it("shouldn't allow a driver to accept a ride if status isn't 'requested'", async () => {
-      const input = {
-        passengerId: passengerAccountId,
-        from: { lat: 0, long: 0 },
-        to: { lat: 0, long: 0 }
-      }
+      const input = getPassengerInput(passengerAccountId)
       const rideService = new RideService()
       const { rideId } = await rideService.requestRide(input)
       const conn = Postgres.getConnection()
@@ -144,16 +126,8 @@ describe('RideService', () => {
         cpf: '95818705552',
         isPassenger: true
       })
-      const firstRideInput = {
-        passengerId: passengerAccountId,
-        from: { lat: 0, long: 0 },
-        to: { lat: 0, long: 0 }
-      }
-      const secondRideInput = {
-        passengerId: newPassengerId,
-        from: { lat: 0, long: 0 },
-        to: { lat: 0, long: 0 }
-      }
+      const firstRideInput = getPassengerInput(passengerAccountId)
+      const secondRideInput = getPassengerInput(newPassengerId)
       const rideService = new RideService()
       const { rideId: firstRideId } =
         await rideService.requestRide(firstRideInput)
