@@ -2,6 +2,7 @@
 // import AccountDAO from '../dao/account/AccountDAODatabase'
 // import sinon from 'sinon'
 // import MailerGateway from '../gateway/MailerGateway'
+// TODO - testar o envio de email mockando o MailerGateway | e fazr o mesmo com database
 import AccountService from '../AccountService'
 import AccountDAOMemory from '../dao/account/AccountDAOMemory'
 
