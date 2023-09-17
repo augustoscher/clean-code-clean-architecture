@@ -82,7 +82,18 @@ export default class RideService {
     await this.rideDAO.update(ride)
   }
 
-  async startRide(rideId: string) {}
+  async startRide(rideId: string) {
+    const ride = await this.getRide(rideId)
+    if (!ride) throw new Error('Ride not found')
+    if (ride.status != RideStatus.Accepeted)
+      throw new Error('The ride is not accepted')
+    const updatedRide = {
+      rideId,
+      driverId: ride.driver_id,
+      status: RideStatus.InProgress
+    }
+    await this.rideDAO.update(updatedRide)
+  }
 
   async updatePosition({ rideId, lat, long }: UpdatePositionParams) {}
 

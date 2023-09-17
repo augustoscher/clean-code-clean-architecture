@@ -1,5 +1,5 @@
 import AccountService from '../AccountService'
-import RideService from '../RideService'
+import RideService, { RideStatus } from '../RideService'
 import Postgres from '../database/postgres'
 
 describe('RideService', () => {
@@ -147,8 +147,31 @@ describe('RideService', () => {
   })
 
   describe('startRide', () => {
-    // Deve verificar se a corrida está em status "accepted", se não estiver lançar um erro
-    // Deve modificar o status da corrida para "in_progress"
+    test('should allow a driver to start a ride when status is accepted', async () => {
+      const input = getPassengerInput(passengerAccountId)
+      const rideService = new RideService()
+      const { rideId } = await rideService.requestRide(input)
+      await rideService.acceptRide({ driverId: driverAccountId, rideId })
+      await rideService.startRide(rideId)
+      const ride = await rideService.getRide(rideId)
+      expect(ride.status).toBe(RideStatus.InProgress)
+    })
+
+    test("shouldn't allow a driver to start a ride when status is different the accepted", async () => {
+      const input = getPassengerInput(passengerAccountId)
+      const rideService = new RideService()
+      const { rideId } = await rideService.requestRide(input)
+      await expect(() => rideService.startRide(rideId)).rejects.toThrow(
+        new Error('The ride is not accepted')
+      )
+    })
+
+    test("shouldn't allow a driver to start a ride when ride doesn't exist", async () => {
+      const rideService = new RideService()
+      await expect(() =>
+        rideService.startRide('some-invalid-reide-id')
+      ).rejects.toThrow(new Error('Ride not found'))
+    })
   })
 
   describe('updatePosition', () => {
