@@ -47,7 +47,13 @@ export default class RideDAODatabase implements RideDAO {
         'select * from cccat13.ride where ride_id = $1',
         [rideId]
       )
-      return rideData
+      return {
+        ...rideData,
+        from_lat: Number(rideData.from_lat),
+        from_long: Number(rideData.from_long),
+        to_lat: Number(rideData.to_lat),
+        to_long: Number(rideData.to_long)
+      }
     } finally {
       await connection.$pool.end()
     }
