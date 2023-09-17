@@ -1,5 +1,5 @@
-import AccountService from '../AccountService'
-import RideService, { RideStatus } from '../RideService'
+import AccountService from '../services/AccountService'
+import RideService, { RideStatus } from '../services/RideService'
 import Postgres from '../database/postgres'
 
 describe('RideService', () => {
@@ -169,7 +169,7 @@ describe('RideService', () => {
     test("shouldn't allow a driver to start a ride when ride doesn't exist", async () => {
       const rideService = new RideService()
       await expect(() =>
-        rideService.startRide('some-invalid-reide-id')
+        rideService.startRide(crypto.randomUUID())
       ).rejects.toThrow(new Error('Ride not found'))
     })
   })

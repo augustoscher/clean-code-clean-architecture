@@ -1,7 +1,7 @@
 // driver
 // adapter
 import express from 'express'
-import AccountService from './AccountService'
+import AccountService from './services/AccountService'
 const app = express()
 app.use(express.json())
 

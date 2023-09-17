@@ -1,7 +1,7 @@
-import AccountDAO from './dao/account/AccountDAO'
-import AccountDAODatabase from './dao/account/AccountDAODatabase'
-import RideDAO from './dao/ride/RideDAO'
-import RideDAODatabase from './dao/ride/RideDAODatabase'
+import AccountDAO from '../dao/account/AccountDAO'
+import AccountDAODatabase from '../dao/account/AccountDAODatabase'
+import RideDAO from '../dao/ride/RideDAO'
+import RideDAODatabase from '../dao/ride/RideDAODatabase'
 import crypto from 'crypto'
 
 export type GetRideParams = {

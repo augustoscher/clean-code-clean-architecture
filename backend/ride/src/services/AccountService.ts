@@ -1,8 +1,8 @@
 import crypto from 'crypto'
-import CpfValidator from './CpfValidator'
-import AccountDAO from './dao/account/AccountDAO'
-import MailerGateway from './gateway/MailerGateway'
-import AccountDAODatabase from './dao/account/AccountDAODatabase'
+import CpfValidator from '../CpfValidator'
+import AccountDAO from '../dao/account/AccountDAO'
+import MailerGateway from '../gateway/MailerGateway'
+import AccountDAODatabase from '../dao/account/AccountDAODatabase'
 
 const VALID_CARD_PLATE_REGEXP = /[A-Z]{3}[0-9]{4}/
 const VALID_EMAIL_REGEXP = /^(.+)@(.+)$/
@@ -45,7 +45,7 @@ export default class AccountService {
       isVerified: input.isVerified,
       verificationCode: input.verificationCode
     })
-    await this.sendEmail(
+    await this.mailerGateway.send(
       input.email,
       'Verification',
       `Please verify your code at first login ${verificationCode}`
