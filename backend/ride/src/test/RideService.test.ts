@@ -175,12 +175,48 @@ describe('RideService', () => {
   })
 
   describe('updatePosition', () => {
-    // Deve verificar se a corrida está em status "in_progress", se não estiver lançar um erro
-    // Deve gerar o position_id
-    // Deve salvar na tabela position: position_id, ride_id, lat, long e date
-    test('should update position when ride is in progress', async () => {})
+    test('should update position when ride is in progress', async () => {
+      const input = getPassengerInput(passengerAccountId)
+      const rideService = new RideService()
+      const { rideId } = await rideService.requestRide(input)
+      await rideService.acceptRide({ driverId: driverAccountId, rideId })
+      await rideService.startRide(rideId)
+      const positionInput = {
+        rideId,
+        lat: -26.913061443489774,
+        long: -49.080980464673274
+      }
+      await rideService.updatePosition(positionInput)
+      const positions = await rideService.getRidePositions(rideId)
+      expect(positions.length).toBe(1)
+      expect(positions[0]?.position_id).toBeDefined()
+      expect(positions[0]?.lat).toBe(positionInput.lat)
+      expect(positions[0]?.long).toBe(positionInput.long)
+    })
 
-    test("shouldn't update position when ride is not in progress", async () => {})
+    test("shouldn't update position when ride is not in progress", async () => {
+      const input = getPassengerInput(passengerAccountId)
+      const rideService = new RideService()
+      const { rideId } = await rideService.requestRide(input)
+      await await expect(() =>
+        rideService.updatePosition({
+          rideId,
+          lat: -26.913061443489774,
+          long: -49.080980464673274
+        })
+      ).rejects.toThrow(new Error('The ride is not in progress'))
+    })
+
+    test("shouldn't update position when ride doesn't exist", async () => {
+      const rideService = new RideService()
+      await await expect(() =>
+        rideService.updatePosition({
+          rideId: crypto.randomUUID(),
+          lat: -26.913061443489774,
+          long: -49.080980464673274
+        })
+      ).rejects.toThrow(new Error('Ride not found'))
+    })
   })
 
   describe('finishRide', () => {

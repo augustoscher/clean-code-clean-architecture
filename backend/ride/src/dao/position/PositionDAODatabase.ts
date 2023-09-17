@@ -41,4 +41,21 @@ export default class PositionDAODatabase implements PositionDAO {
       await connection.$pool.end()
     }
   }
+
+  async getByRideId(rideId: string): Promise<any> {
+    const connection = Postgres.getConnection()
+    try {
+      const positionsData = await connection.query(
+        'select * from cccat13.position where ride_id = $1',
+        [rideId]
+      )
+      return positionsData.map((positionData: any) => ({
+        ...positionData,
+        lat: Number(positionData.lat),
+        long: Number(positionData.long)
+      }))
+    } finally {
+      await connection.$pool.end()
+    }
+  }
 }

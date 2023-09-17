@@ -1,5 +1,7 @@
 import AccountDAO from '../dao/account/AccountDAO'
 import AccountDAODatabase from '../dao/account/AccountDAODatabase'
+import PositionDAO from '../dao/position/PositionDAO'
+import PositionDAODatabase from '../dao/position/PositionDAODatabase'
 import RideDAO from '../dao/ride/RideDAO'
 import RideDAODatabase from '../dao/ride/RideDAODatabase'
 import crypto from 'crypto'
@@ -24,6 +26,13 @@ export type UpdatePositionParams = {
   lat: number
   long: number
 }
+export type RidePositions = {
+  ride_id: string
+  position_id: string
+  lat: number
+  long: number
+  date: Date
+}
 
 export enum RideStatus {
   Requested = 'REQUESTED',
@@ -36,7 +45,8 @@ export enum RideStatus {
 export default class RideService {
   constructor(
     readonly rideDAO: RideDAO = new RideDAODatabase(),
-    readonly accountDAO: AccountDAO = new AccountDAODatabase()
+    readonly accountDAO: AccountDAO = new AccountDAODatabase(),
+    readonly poisitionDAO: PositionDAO = new PositionDAODatabase()
   ) {}
 
   async requestRide({ passengerId, from, to }: GetRideParams) {
@@ -95,12 +105,30 @@ export default class RideService {
     await this.rideDAO.update(updatedRide)
   }
 
-  async updatePosition({ rideId, lat, long }: UpdatePositionParams) {}
+  async updatePosition({ rideId, lat, long }: UpdatePositionParams) {
+    const ride = await this.getRide(rideId)
+    if (!ride) throw new Error('Ride not found')
+    if (ride.status != RideStatus.InProgress)
+      throw new Error('The ride is not in progress')
+    const positionId = crypto.randomUUID()
+    await this.poisitionDAO.save({
+      positionId,
+      rideId,
+      lat,
+      long,
+      date: new Date()
+    })
+  }
 
   async finishRide(rideId: string) {}
 
   async getRide(rideId: string) {
     const ride = await this.rideDAO.getById(rideId)
     return ride
+  }
+
+  async getRidePositions(rideId: string): Promise<[RidePositions] | []> {
+    const positions = await this.poisitionDAO.getByRideId(rideId)
+    return positions
   }
 }
