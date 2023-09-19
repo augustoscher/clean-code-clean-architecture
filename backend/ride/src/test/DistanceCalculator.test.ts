@@ -1,6 +1,6 @@
-import DistanceCalculator from '../distance/DistanceCalculator'
+import DistanceCalculator from '../distance/DistanceCalculatorStraightLine'
 
-describe('DistanceCalculator', () => {
+describe('DistanceCalculatorStraightLine', () => {
   test.each([
     {
       from: { lat: 0, long: 0 },
@@ -19,7 +19,7 @@ describe('DistanceCalculator', () => {
     }
   ])('should calculate the distance in a straight line (km)', data => {
     const { from, to, expectedDistance } = data
-    const distance = DistanceCalculator.calculate(from, to)
+    const distance = new DistanceCalculator().calculate(from, to)
     expect(distance).toBe(expectedDistance)
   })
 })
