@@ -120,7 +120,12 @@ export default class RideService {
     })
   }
 
-  async finishRide(rideId: string) {}
+  async finishRide(rideId: string) {
+    const ride = await this.getRide(rideId)
+    if (!ride) throw new Error('Ride not found')
+    if (ride.status != RideStatus.InProgress)
+      throw new Error('The ride is not in progress')
+  }
 
   async getRide(rideId: string) {
     const ride = await this.rideDAO.getById(rideId)

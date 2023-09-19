@@ -220,8 +220,21 @@ describe('RideService', () => {
   })
 
   describe('finishRide', () => {
-    // Deve verificar se a corrida está em status "in_progress", se não estiver lançar um erro
-    test("shouldn't allow finish ride when ride is not in progress", async () => {})
+    test("shouldn't allow finish ride when ride doesn't exists", async () => {
+      const rideService = new RideService()
+      await await expect(() =>
+        rideService.finishRide(crypto.randomUUID())
+      ).rejects.toThrow(new Error('Ride not found'))
+    })
+
+    test("shouldn't allow finish ride when ride is not in progress", async () => {
+      const input = getPassengerInput(passengerAccountId)
+      const rideService = new RideService()
+      const { rideId } = await rideService.requestRide(input)
+      await expect(() => rideService.finishRide(rideId)).rejects.toThrow(
+        new Error('The ride is not in progress')
+      )
+    })
 
     test('should calculate distance in km', async () => {})
 
