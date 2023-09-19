@@ -23,8 +23,6 @@ export default class PositionDAODatabase implements PositionDAO {
     }
   }
 
-  // async update(position: any): Promise<void> {}
-
   async getById(positionId: string): Promise<any> {
     const connection = Postgres.getConnection()
     try {
