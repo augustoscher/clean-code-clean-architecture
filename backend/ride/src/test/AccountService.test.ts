@@ -1,12 +1,12 @@
 // driver
-// import AccountDAO from '../dao/account/AccountDAODatabase'
-// import sinon from 'sinon'
-// import MailerGateway from '../gateway/MailerGateway'
-// TODO - testar o envio de email mockando o MailerGateway | e fazr o mesmo com database
+import sinon from 'sinon'
+import MailerGateway from '../gateway/MailerGateway'
 import AccountService from '../services/AccountService'
 import AccountDAOMemory from '../dao/account/AccountDAOMemory'
 
 describe('AccountService', () => {
+  const getAccountService = () => new AccountService(new AccountDAOMemory())
+
   test('Deve criar um passageiro', async function () {
     const input = {
       name: 'John Doe',
@@ -14,7 +14,7 @@ describe('AccountService', () => {
       cpf: '95818705552',
       isPassenger: true
     }
-    const accountService = new AccountService()
+    const accountService = getAccountService()
     const output = await accountService.signup(input)
     const account = await accountService.getAccount(output.accountId)
     expect(account.account_id).toBeDefined()
@@ -30,7 +30,7 @@ describe('AccountService', () => {
       cpf: '95818705500',
       isPassenger: true
     }
-    const accountService = new AccountService()
+    const accountService = getAccountService()
     await expect(() => accountService.signup(input)).rejects.toThrow(
       new Error('Invalid cpf')
     )
@@ -43,7 +43,7 @@ describe('AccountService', () => {
       cpf: '95818705552',
       isPassenger: true
     }
-    const accountService = new AccountService()
+    const accountService = getAccountService()
     await expect(() => accountService.signup(input)).rejects.toThrow(
       new Error('Invalid name')
     )
@@ -56,7 +56,7 @@ describe('AccountService', () => {
       cpf: '95818705552',
       isPassenger: true
     }
-    const accountService = new AccountService()
+    const accountService = getAccountService()
     await expect(() => accountService.signup(input)).rejects.toThrow(
       new Error('Invalid email')
     )
@@ -69,7 +69,7 @@ describe('AccountService', () => {
       cpf: '95818705552',
       isPassenger: true
     }
-    const accountService = new AccountService()
+    const accountService = getAccountService()
     await accountService.signup(input)
     await expect(() => accountService.signup(input)).rejects.toThrow(
       new Error('Account already exists')
@@ -84,7 +84,7 @@ describe('AccountService', () => {
       carPlate: 'AAA9999',
       isDriver: true
     }
-    const accountService = new AccountService()
+    const accountService = getAccountService()
     const output = await accountService.signup(input)
     expect(output.accountId).toBeDefined()
   })
@@ -97,26 +97,28 @@ describe('AccountService', () => {
       carPlate: 'AAA999',
       isDriver: true
     }
-    const accountService = new AccountService()
+    const accountService = getAccountService()
     await expect(() => accountService.signup(input)).rejects.toThrow(
       new Error('Invalid plate')
     )
   })
 
-  test('Deve criar um passageiro com fake', async function () {
-    const accountMemoryDAO = new AccountDAOMemory()
+  test('Deve chamar o MailerGateway após criar a conta', async function () {
+    const spy = sinon.spy(MailerGateway.prototype, 'send')
     const input = {
       name: 'John Doe',
       email: `john.doe${Math.random()}@gmail.com`,
       cpf: '95818705552',
       isPassenger: true
     }
-    const accountService = new AccountService(accountMemoryDAO)
+    const accountService = getAccountService()
     const output = await accountService.signup(input)
     const account = await accountService.getAccount(output.accountId)
     expect(account.account_id).toBeDefined()
     expect(account.name).toBe(input.name)
     expect(account.email).toBe(input.email)
     expect(account.cpf).toBe(input.cpf)
+    expect(spy.calledWith(input.email, 'Verification')).toBeTruthy()
+    spy.restore()
   })
 })
