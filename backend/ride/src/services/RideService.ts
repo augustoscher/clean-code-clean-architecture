@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AccountDAO from '../dao/account/AccountDAO'
 import AccountDAODatabase from '../dao/account/AccountDAODatabase'
 import PositionDAO from '../dao/position/PositionDAO'
 import PositionDAODatabase from '../dao/position/PositionDAODatabase'
 import RideDAO from '../dao/ride/RideDAO'
 import RideDAODatabase from '../dao/ride/RideDAODatabase'
+import DistanceCalculator from '../distance/DistanceCalculator'
+import DistanceCalculatorStraightLine from '../distance/DistanceCalculatorStraightLine'
 import crypto from 'crypto'
 
 export type GetRideParams = {
@@ -46,7 +49,9 @@ export default class RideService {
   constructor(
     readonly rideDAO: RideDAO = new RideDAODatabase(),
     readonly accountDAO: AccountDAO = new AccountDAODatabase(),
-    readonly poisitionDAO: PositionDAO = new PositionDAODatabase()
+    readonly poisitionDAO: PositionDAO = new PositionDAODatabase(),
+    readonly distanceCalculator: DistanceCalculator = new DistanceCalculatorStraightLine(),
+    readonly farePrice = 2.1
   ) {}
 
   async requestRide({ passengerId, from, to }: GetRideParams) {
@@ -125,11 +130,44 @@ export default class RideService {
     if (!ride) throw new Error('Ride not found')
     if (ride.status != RideStatus.InProgress)
       throw new Error('The ride is not in progress')
+    const positions = await this.poisitionDAO.getByRideId(rideId)
+    const totalDistance = positions
+      .map((pos: any) => ({
+        lat: pos.lat,
+        long: pos.long
+      }))
+      .reduce(
+        (
+          total: number,
+          position: { lat: number; long: number },
+          index: number
+        ) => {
+          if (index == 0) return 0
+          const lastPosition = positions[index - 1]
+          total += this.distanceCalculator.calculate(lastPosition, position)
+          return total
+        },
+        0
+      )
+    const updatedRide = {
+      rideId,
+      driverId: ride.driver_id,
+      status: RideStatus.Completed,
+      distance: totalDistance,
+      fare: totalDistance * this.farePrice
+    }
+    await this.rideDAO.update(updatedRide)
   }
 
   async getRide(rideId: string) {
     const ride = await this.rideDAO.getById(rideId)
     return ride
+      ? {
+          ...ride,
+          fare: Number(ride?.fare),
+          distance: Number(ride?.distance)
+        }
+      : null
   }
 
   async getRidePositions(rideId: string): Promise<[RidePositions] | []> {

@@ -236,13 +236,55 @@ describe('RideService', () => {
       )
     })
 
-    test('should calculate distance in km', async () => {})
+    test('should finish ride and update status, distance and fare', async () => {
+      const input = getPassengerInput(passengerAccountId)
+      const rideService = new RideService()
+      const { rideId } = await rideService.requestRide(input)
+      await rideService.acceptRide({ driverId: driverAccountId, rideId })
+      await rideService.startRide(rideId)
+      await rideService.updatePosition({
+        rideId,
+        lat: -26.91448020906993,
+        long: -49.09012857447635
+      })
+      await rideService.updatePosition({
+        rideId,
+        lat: -28.117481138039185,
+        long: -54.83625057524163
+      })
+      await rideService.finishRide(rideId)
+      const ride = await rideService.getRide(rideId)
+      expect(ride.status).toBe(RideStatus.Completed)
+      expect(ride.distance).toBe(582.1429498711539)
+      expect(ride.fare).toBe(1222.5001947294231)
+    })
 
-    test('should calculate fare', async () => {})
-
-    test('should finish ride and update status, distance and fare', async () => {})
-    // Deve obter todas as positions e calcular a distância entre cada uma delas, para isso utilize um algoritmo que receba duas coordenadas (lat, long) e retorne a distância entre elas em km.
-    // Com a distância total calculada, calcule o valor da corrida (fare) multiplicando a distância por 2,1
-    // Atualizar a corrida com o status "completed", a distância e o valor da corrida (fare)
+    test('should finish ride with many positions', async () => {
+      const input = getPassengerInput(passengerAccountId)
+      const rideService = new RideService()
+      const { rideId } = await rideService.requestRide(input)
+      await rideService.acceptRide({ driverId: driverAccountId, rideId })
+      await rideService.startRide(rideId)
+      await rideService.updatePosition({
+        rideId,
+        lat: -26.91448020906993,
+        long: -49.09012857447635
+      })
+      await rideService.updatePosition({
+        rideId,
+        lat: -26.920592021792398,
+        long: -49.06919226098154
+      })
+      await rideService.updatePosition({
+        rideId,
+        lat: -28.117481138039185,
+        long: -54.83625057524163
+      })
+      await rideService.finishRide(rideId)
+      const ride = await rideService.getRide(rideId)
+      expect(ride.status).toBe(RideStatus.Completed)
+      expect(ride.distance).toBe(586.165527079648)
+      expect(ride.fare).toBe(1230.947606867261)
+    })
   })
 })
