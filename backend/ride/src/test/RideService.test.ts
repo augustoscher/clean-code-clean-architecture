@@ -77,7 +77,7 @@ describe('RideService', () => {
       const rideService = new RideService()
       const output = await rideService.requestRide(input)
       const ride = await rideService.getRide(output.rideId)
-      expect(ride.status).toBe('REQUESTED')
+      expect(ride.status).toBe(RideStatus.Requested)
     })
   })
 
