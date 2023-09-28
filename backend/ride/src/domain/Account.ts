@@ -21,6 +21,10 @@ export type RestoreAccountParams = {
   verificationCode: string
 }
 
+const VALID_CARD_PLATE_REGEXP = /[A-Z]{3}[0-9]{4}/
+const VALID_EMAIL_REGEXP = /^(.+)@(.+)$/
+const VALID_NAME_REGEXP = /[a-zA-Z] [a-zA-Z]+/
+
 export default class Account {
   private constructor(
     readonly accountId: string,
@@ -42,11 +46,10 @@ export default class Account {
     isDriver,
     carPlate
   }: CreateAccountParams) {
-    if (!name.match(/[a-zA-Z] [a-zA-Z]+/)) throw new Error('Invalid name')
-    if (!email.match(/^(.+)@(.+)$/)) throw new Error('Invalid email')
-    const cpfValidator = new CpfValidator()
-    if (!cpfValidator.validate(cpf)) throw new Error('Invalid cpf')
-    if (isDriver && !carPlate.match(/[A-Z]{3}[0-9]{4}/))
+    if (!name.match(VALID_NAME_REGEXP)) throw new Error('Invalid name')
+    if (!email.match(VALID_EMAIL_REGEXP)) throw new Error('Invalid email')
+    if (!new CpfValidator().validate(cpf)) throw new Error('Invalid cpf')
+    if (isDriver && !carPlate.match(VALID_CARD_PLATE_REGEXP))
       throw new Error('Invalid plate')
     const accountId = crypto.randomUUID()
     const verificationCode = crypto.randomUUID()
