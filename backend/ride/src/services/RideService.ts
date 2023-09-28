@@ -147,20 +147,6 @@ export default class RideService {
   async getRide(rideId: string) {
     const ride = await this.rideDAO.getById(rideId)
     return ride
-      ? Ride.restore({
-          rideId: ride.ride_id,
-          passengerId: ride.passenger_id,
-          driverId: ride.driver_id,
-          fromLat: Number(ride.from_lat),
-          fromLong: Number(ride.from_long),
-          toLat: Number(ride.to_lat),
-          toLong: Number(ride.to_long),
-          status: ride.status as RideStatus,
-          distance: Number(ride.distance),
-          fare: Number(ride.fare),
-          date: ride.date
-        })
-      : null
   }
 
   async getRidePositions(rideId: string): Promise<[RidePositions] | []> {

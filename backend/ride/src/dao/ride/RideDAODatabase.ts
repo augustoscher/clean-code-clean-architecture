@@ -51,14 +51,19 @@ export default class RideDAODatabase implements RideDAO {
       )
 
       return rideData
-        ? {
-            ...rideData,
-            status: rideData?.status as RideStatus,
-            from_lat: Number(rideData?.from_lat),
-            from_long: Number(rideData?.from_long),
-            to_lat: Number(rideData?.to_lat),
-            to_long: Number(rideData?.to_long)
-          }
+        ? Ride.restore({
+            rideId: rideData.ride_id,
+            passengerId: rideData.passenger_id,
+            driverId: rideData.driver_id,
+            fromLat: Number(rideData.from_lat),
+            fromLong: Number(rideData.from_long),
+            toLat: Number(rideData.to_lat),
+            toLong: Number(rideData.to_long),
+            status: rideData.status as RideStatus,
+            distance: Number(rideData.distance),
+            fare: Number(rideData.fare),
+            date: rideData.date
+          })
         : null
     } finally {
       await connection.$pool.end()
