@@ -73,8 +73,6 @@ export default class RideService {
     const account = await this.accountDAO.getById(driverId)
     if (!account.is_driver) throw new Error('Only drivers can accept rides')
     const ride = await this.getRide(rideId)
-    if (ride?.getStatus() != RideStatus.Requested)
-      throw new Error('The ride is not requested')
     const activeRides = await this.rideDAO.getActiveRidesByDriverId(driverId)
     if (activeRides.length > 0)
       throw new Error('Driver is already in another ride')
