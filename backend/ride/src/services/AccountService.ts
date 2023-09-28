@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import CpfValidator from '../CpfValidator'
+import CpfValidator from '../domain/CpfValidator'
 import AccountDAO from '../dao/account/AccountDAO'
 import MailerGateway from '../gateway/MailerGateway'
 import AccountDAODatabase from '../dao/account/AccountDAODatabase'
