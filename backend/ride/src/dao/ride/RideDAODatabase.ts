@@ -2,12 +2,14 @@
 // resource - driven actor
 // adapter
 import Postgres from '../../database/postgres'
+import Ride from '../../domain/Ride'
+import RideStatus from '../../domain/RideStatus'
 import RideDAO from './RideDAO'
 
 export default class RideDAODatabase implements RideDAO {
   constructor() {}
 
-  async save(ride: any) {
+  async save(ride: Ride) {
     const connection = Postgres.getConnection()
     try {
       await connection.query(
@@ -15,11 +17,11 @@ export default class RideDAODatabase implements RideDAO {
         [
           ride.rideId,
           ride.passengerId,
-          ride.from.lat,
-          ride.from.long,
-          ride.to.lat,
-          ride.to.long,
-          ride.status,
+          ride.fromLat,
+          ride.fromLong,
+          ride.toLat,
+          ride.toLong,
+          ride.getStatus(),
           ride.date
         ]
       )
@@ -51,6 +53,7 @@ export default class RideDAODatabase implements RideDAO {
       return rideData
         ? {
             ...rideData,
+            status: rideData?.status as RideStatus,
             from_lat: Number(rideData?.from_lat),
             from_long: Number(rideData?.from_long),
             to_lat: Number(rideData?.to_lat),

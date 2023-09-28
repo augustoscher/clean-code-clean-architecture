@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import Ride from '../../domain/Ride'
+
 // port
 export default interface RideDAO {
-  save(ride: any): Promise<void>
+  save(ride: Ride): Promise<void>
   update(ride: any): Promise<void>
   getById(rideId: string): Promise<any>
   getActiveRidesByPassengerId(passengerId: string): Promise<any>

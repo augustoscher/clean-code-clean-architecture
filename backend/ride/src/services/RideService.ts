@@ -8,6 +8,8 @@ import RideDAODatabase from '../dao/ride/RideDAODatabase'
 import DistanceCalculator from '../distance/DistanceCalculator'
 import DistanceCalculatorStraightLine from '../distance/DistanceCalculatorStraightLine'
 import crypto from 'crypto'
+import RideStatus from '../domain/RideStatus'
+import Ride from '../domain/Ride'
 
 export type GetRideParams = {
   passengerId: string
@@ -37,14 +39,6 @@ export type RidePositions = {
   date: Date
 }
 
-export enum RideStatus {
-  Requested = 'REQUESTED',
-  Accepeted = 'ACCEPTED',
-  InProgress = 'IN_PROGRESS',
-  Completed = 'COMPLETED',
-  Canceled = 'CANCELED'
-}
-
 export default class RideService {
   constructor(
     readonly rideDAO: RideDAO = new RideDAODatabase(),
@@ -62,23 +56,16 @@ export default class RideService {
       await this.rideDAO.getActiveRidesByPassengerId(passengerId)
     if (activeRides.length > 0)
       throw new Error('This passenger already has an active ride')
-    const rideId = crypto.randomUUID()
-    await this.rideDAO.save({
-      rideId,
+    const ride = Ride.create({
       passengerId: account.account_id,
-      from: {
-        lat: from.lat,
-        long: from.long
-      },
-      to: {
-        lat: to.lat,
-        long: to.long
-      },
-      status: RideStatus.Requested,
-      date: new Date()
+      fromLat: from.lat,
+      fromLong: from.long,
+      toLat: to.lat,
+      toLong: to.long
     })
+    await this.rideDAO.save(ride)
     return {
-      rideId
+      rideId: ride.rideId
     }
   }
 
@@ -86,25 +73,23 @@ export default class RideService {
     const account = await this.accountDAO.getById(driverId)
     if (!account.is_driver) throw new Error('Only drivers can accept rides')
     const ride = await this.getRide(rideId)
-    if (ride.status != RideStatus.Requested)
+    if (ride?.getStatus() != RideStatus.Requested)
       throw new Error('The ride is not requested')
     const activeRides = await this.rideDAO.getActiveRidesByDriverId(driverId)
     if (activeRides.length > 0)
       throw new Error('Driver is already in another ride')
-    ride.rideId = rideId
-    ride.driverId = driverId
-    ride.status = RideStatus.Accepeted
+    ride.accept(driverId)
     await this.rideDAO.update(ride)
   }
 
   async startRide(rideId: string) {
     const ride = await this.getRide(rideId)
     if (!ride) throw new Error('Ride not found')
-    if (ride.status != RideStatus.Accepeted)
+    if (ride.getStatus() != RideStatus.Accepeted)
       throw new Error('The ride is not accepted')
     const updatedRide = {
       rideId,
-      driverId: ride.driver_id,
+      driverId: ride.driverId,
       status: RideStatus.InProgress
     }
     await this.rideDAO.update(updatedRide)
@@ -113,7 +98,7 @@ export default class RideService {
   async updatePosition({ rideId, lat, long }: UpdatePositionParams) {
     const ride = await this.getRide(rideId)
     if (!ride) throw new Error('Ride not found')
-    if (ride.status != RideStatus.InProgress)
+    if (ride.getStatus() != RideStatus.InProgress)
       throw new Error('The ride is not in progress')
     const positionId = crypto.randomUUID()
     await this.poisitionDAO.save({
@@ -128,7 +113,7 @@ export default class RideService {
   async finishRide(rideId: string) {
     const ride = await this.getRide(rideId)
     if (!ride) throw new Error('Ride not found')
-    if (ride.status != RideStatus.InProgress)
+    if (ride.getStatus() != RideStatus.InProgress)
       throw new Error('The ride is not in progress')
     const positions = await this.poisitionDAO.getByRideId(rideId)
     const totalDistance = positions
@@ -151,7 +136,7 @@ export default class RideService {
       )
     const updatedRide = {
       rideId,
-      driverId: ride.driver_id,
+      driverId: ride.driverId,
       status: RideStatus.Completed,
       distance: totalDistance,
       fare: totalDistance * this.farePrice
@@ -162,11 +147,19 @@ export default class RideService {
   async getRide(rideId: string) {
     const ride = await this.rideDAO.getById(rideId)
     return ride
-      ? {
-          ...ride,
-          fare: Number(ride?.fare),
-          distance: Number(ride?.distance)
-        }
+      ? Ride.restore({
+          rideId: ride.ride_id,
+          passengerId: ride.passenger_id,
+          driverId: ride.driver_id,
+          fromLat: Number(ride.from_lat),
+          fromLong: Number(ride.from_long),
+          toLat: Number(ride.to_lat),
+          toLong: Number(ride.to_long),
+          status: ride.status as RideStatus,
+          distance: Number(ride.distance),
+          fare: Number(ride.fare),
+          date: ride.date
+        })
       : null
   }
 

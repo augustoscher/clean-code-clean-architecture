@@ -1,6 +1,7 @@
 import AccountService from '../services/AccountService'
-import RideService, { RideStatus } from '../services/RideService'
+import RideService from '../services/RideService'
 import Postgres from '../database/postgres'
+import RideStatus from '../domain/RideStatus'
 
 describe('RideService', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,7 +78,7 @@ describe('RideService', () => {
       const rideService = new RideService()
       const output = await rideService.requestRide(input)
       const ride = await rideService.getRide(output.rideId)
-      expect(ride.status).toBe(RideStatus.Requested)
+      expect(ride?.getStatus()).toBe(RideStatus.Requested)
     })
   })
 
@@ -88,8 +89,8 @@ describe('RideService', () => {
       const { rideId } = await rideService.requestRide(input)
       await rideService.acceptRide({ driverId: driverAccountId, rideId })
       const ride = await rideService.getRide(rideId)
-      expect(ride.status).toBe('ACCEPTED')
-      expect(ride.driver_id).toBe(driverAccountId)
+      expect(ride?.getStatus()).toBe('ACCEPTED')
+      expect(ride?.driverId).toBe(driverAccountId)
     })
 
     it("shouldn't allow passenger to accept a ride", async () => {
@@ -154,7 +155,7 @@ describe('RideService', () => {
       await rideService.acceptRide({ driverId: driverAccountId, rideId })
       await rideService.startRide(rideId)
       const ride = await rideService.getRide(rideId)
-      expect(ride.status).toBe(RideStatus.InProgress)
+      expect(ride?.getStatus()).toBe(RideStatus.InProgress)
     })
 
     test("shouldn't allow a driver to start a ride when status is different the accepted", async () => {
@@ -254,9 +255,9 @@ describe('RideService', () => {
       })
       await rideService.finishRide(rideId)
       const ride = await rideService.getRide(rideId)
-      expect(ride.status).toBe(RideStatus.Completed)
-      expect(ride.distance).toBe(582.1429498711539)
-      expect(ride.fare).toBe(1222.5001947294231)
+      expect(ride?.getStatus()).toBe(RideStatus.Completed)
+      expect(ride?.distance).toBe(582.1429498711539)
+      expect(ride?.fare).toBe(1222.5001947294231)
     })
 
     test('should finish ride with many positions', async () => {
@@ -282,9 +283,9 @@ describe('RideService', () => {
       })
       await rideService.finishRide(rideId)
       const ride = await rideService.getRide(rideId)
-      expect(ride.status).toBe(RideStatus.Completed)
-      expect(ride.distance).toBe(586.165527079648)
-      expect(ride.fare).toBe(1230.947606867261)
+      expect(ride?.getStatus()).toBe(RideStatus.Completed)
+      expect(ride?.distance).toBe(586.165527079648)
+      expect(ride?.fare).toBe(1230.947606867261)
     })
   })
 })
