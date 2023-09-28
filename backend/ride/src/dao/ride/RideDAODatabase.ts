@@ -42,7 +42,7 @@ export default class RideDAODatabase implements RideDAO {
     }
   }
 
-  async getById(rideId: string): Promise<any> {
+  async getById(rideId: string): Promise<Ride> {
     const connection = Postgres.getConnection()
     try {
       const [rideData] = await connection.query(
@@ -50,21 +50,19 @@ export default class RideDAODatabase implements RideDAO {
         [rideId]
       )
 
-      return rideData
-        ? Ride.restore({
-            rideId: rideData.ride_id,
-            passengerId: rideData.passenger_id,
-            driverId: rideData.driver_id,
-            fromLat: Number(rideData.from_lat),
-            fromLong: Number(rideData.from_long),
-            toLat: Number(rideData.to_lat),
-            toLong: Number(rideData.to_long),
-            status: rideData.status as RideStatus,
-            distance: Number(rideData.distance),
-            fare: Number(rideData.fare),
-            date: rideData.date
-          })
-        : null
+      return Ride.restore({
+        rideId: rideData.ride_id,
+        passengerId: rideData.passenger_id,
+        driverId: rideData.driver_id,
+        fromLat: Number(rideData.from_lat),
+        fromLong: Number(rideData.from_long),
+        toLat: Number(rideData.to_lat),
+        toLong: Number(rideData.to_long),
+        status: rideData.status as RideStatus,
+        distance: Number(rideData.distance),
+        fare: Number(rideData.fare),
+        date: rideData.date
+      })
     } finally {
       await connection.$pool.end()
     }

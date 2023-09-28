@@ -16,7 +16,7 @@ describe('RideDAODatabase', () => {
     await rideDAO.save(rideEntity)
     const ride = await rideDAO.getById(rideEntity.rideId)
     expect(ride.passengerId).toBe(rideEntity.passengerId)
-    expect(ride.status).toBe(rideEntity.getStatus())
+    expect(ride.getStatus()).toBe(rideEntity.getStatus())
     expect(ride.fromLat).toBe(rideEntity.fromLat)
     expect(ride.fromLong).toBe(rideEntity.fromLong)
     expect(ride.toLat).toBe(rideEntity.toLat)
