@@ -50,14 +50,14 @@ export default class RideService {
 
   async requestRide({ passengerId, from, to }: GetRideParams) {
     const account = await this.accountDAO.getById(passengerId)
-    if (!account.is_passenger)
+    if (!account?.isPassenger)
       throw new Error('Account is not from a passenger')
     const activeRides =
       await this.rideDAO.getActiveRidesByPassengerId(passengerId)
     if (activeRides.length > 0)
       throw new Error('This passenger already has an active ride')
     const ride = Ride.create({
-      passengerId: account.account_id,
+      passengerId: account?.accountId,
       fromLat: from.lat,
       fromLong: from.long,
       toLat: to.lat,
@@ -71,7 +71,7 @@ export default class RideService {
 
   async acceptRide({ driverId, rideId }: AcceptRideParams) {
     const account = await this.accountDAO.getById(driverId)
-    if (!account.is_driver) throw new Error('Only drivers can accept rides')
+    if (!account?.isDriver) throw new Error('Only drivers can accept rides')
     const ride = await this.getRide(rideId)
     const activeRides = await this.rideDAO.getActiveRidesByDriverId(driverId)
     if (activeRides.length > 0)

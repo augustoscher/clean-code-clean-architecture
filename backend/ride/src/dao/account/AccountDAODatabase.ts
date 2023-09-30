@@ -2,10 +2,11 @@
 // resource - driven actor
 // adapter
 import Postgres from '../../database/postgres'
+import Account from '../../domain/Account'
 import AccountDAO from './AccountDAO'
 
 export default class AccountDAODatabase implements AccountDAO {
-  async save(input: any) {
+  async save(input: Account) {
     const connection = Postgres.getConnection()
     try {
       await connection.query(
@@ -19,7 +20,7 @@ export default class AccountDAODatabase implements AccountDAO {
           input.isPassenger,
           input.isDriver,
           input.date,
-          input.isVerified,
+          false,
           input.verificationCode
         ]
       )
@@ -35,7 +36,18 @@ export default class AccountDAODatabase implements AccountDAO {
         'select * from cccat13.account where email = $1',
         [email]
       )
-      return account
+      if (!account) return
+      return Account.restore({
+        accountId: account.account_id,
+        name: account.name,
+        email: account.email,
+        cpf: account.cpf,
+        isPassenger: account.is_passenger,
+        isDriver: account.is_driver,
+        carPlate: account.car_plate,
+        date: account.date,
+        verificationCode: account.verification_code
+      })
     } finally {
       connection.$pool.end()
     }
@@ -48,7 +60,18 @@ export default class AccountDAODatabase implements AccountDAO {
         'select * from cccat13.account where account_id = $1',
         [accountId]
       )
-      return account
+      if (!account) return
+      return Account.restore({
+        accountId: account.account_id,
+        name: account.name,
+        email: account.email,
+        cpf: account.cpf,
+        isPassenger: account.is_passenger,
+        isDriver: account.is_driver,
+        carPlate: account.car_plate,
+        date: account.date,
+        verificationCode: account.verification_code
+      })
     } finally {
       connection.$pool.end()
     }

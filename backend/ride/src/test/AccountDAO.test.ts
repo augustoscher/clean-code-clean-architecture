@@ -1,46 +1,47 @@
 import AccountDAODatabase from '../dao/account/AccountDAODatabase'
+import Account from '../domain/Account'
 
 describe('AccountDAODatabase', () => {
   const accountDAO = new AccountDAODatabase()
 
   it('should create passenger account and get by id', async () => {
-    const input = {
-      accountId: crypto.randomUUID(),
+    const accountData = Account.create({
       name: 'John Doe',
       email: `john.doe${Math.random()}@gmail.com`,
       cpf: '95818705552',
       isPassenger: true,
       isDriver: false,
-      isVerified: false,
-      verificationCode: crypto.randomUUID()
-    }
-    await accountDAO.save(input)
-    const account = await accountDAO.getById(input.accountId)
-    expect(account.account_id).toBe(input.accountId)
-    expect(account.name).toBe(input.name)
-    expect(account.email).toBe(input.email)
-    expect(account.cpf).toBe(input.cpf)
-    expect(account.is_passenger).toBe(input.isPassenger)
-    expect(account.is_driver).toBe(input.isDriver)
-    expect(account.is_verified).toBe(input.isVerified)
-    expect(account.verification_code).toBe(input.verificationCode)
+      carPlate: ''
+    })
+
+    await accountDAO.save(accountData)
+    const account = await accountDAO.getById(accountData.accountId)
+    expect(account?.accountId).toBe(accountData.accountId)
+    expect(account?.name).toBe(accountData.name)
+    expect(account?.email).toBe(accountData.email)
+    expect(account?.cpf).toBe(accountData.cpf)
+    expect(account?.isPassenger).toBe(accountData.isPassenger)
+    expect(account?.isDriver).toBe(accountData.isDriver)
+    // expect(account?.is_verified).toBe(accountData.isVerified)
+    expect(account?.verificationCode).toBe(accountData.verificationCode)
   })
 
   it('should create driver account and get by email', async () => {
-    const input = {
-      accountId: crypto.randomUUID(),
+    const email = `john.doe${Math.random()}@gmail.com`
+    const accountData = Account.create({
       name: 'John Doe',
-      email: `john.doe${Math.random()}@gmail.com`,
+      email,
       cpf: '95818705552',
       isPassenger: false,
-      isDriver: true
-    }
-    await accountDAO.save(input)
-    const account = await accountDAO.getByEmail(input.email)
-    expect(account.account_id).toBe(input.accountId)
-    expect(account.name).toBe(input.name)
-    expect(account.cpf).toBe(input.cpf)
-    expect(account.is_passenger).toBe(input.isPassenger)
-    expect(account.is_driver).toBe(input.isDriver)
+      isDriver: true,
+      carPlate: 'AAA9999'
+    })
+    await accountDAO.save(accountData)
+    const account = await accountDAO.getByEmail(email)
+    expect(account?.accountId).toBe(accountData.accountId)
+    expect(account?.name).toBe(accountData.name)
+    expect(account?.cpf).toBe(accountData.cpf)
+    expect(account?.isPassenger).toBe(accountData.isPassenger)
+    expect(account?.isDriver).toBe(accountData.isDriver)
   })
 })

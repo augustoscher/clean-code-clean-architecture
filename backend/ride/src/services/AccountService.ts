@@ -29,18 +29,7 @@ export default class AccountService {
       carPlate: input.carPlate
     })
 
-    await this.accountDAO.save({
-      accountId: account.accountId,
-      name: input.name,
-      email: input.email,
-      cpf: input.cpf,
-      carPlate: input.carPlate,
-      isPassenger: input.isPassenger,
-      isDriver: input.isDriver,
-      date: input.date,
-      isVerified: input.isVerified,
-      verificationCode: input.verificationCode
-    })
+    await this.accountDAO.save(account)
     await this.mailerGateway.send(
       input.email,
       'Verification',

@@ -29,7 +29,7 @@ describe('API', () => {
       }
     )
     const outputAccount = await responseAccount.json()
-    expect(outputAccount.account_id).toBeDefined()
+    expect(outputAccount.accountId).toBeDefined()
     expect(outputAccount.name).toBe(passengerInput.name)
     expect(outputAccount.email).toBe(passengerInput.email)
     expect(outputAccount.cpf).toBe(passengerInput.cpf)
