@@ -4,7 +4,7 @@ import RideDAODatabase from '../../dao/ride/RideDAODatabase'
 export default class GetRide {
   constructor(readonly rideDAO: RideDAO = new RideDAODatabase()) {}
 
-  async getRide(rideId: string) {
+  async execute(rideId: string) {
     const ride = await this.rideDAO.getById(rideId)
     return ride
   }
