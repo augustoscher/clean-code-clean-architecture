@@ -8,7 +8,7 @@ export type AcceptRideParams = {
   rideId: string
 }
 
-export default class RideService {
+export default class AcceptRide {
   constructor(
     readonly rideDAO: RideDAO = new RideDAODatabase(),
     readonly accountDAO: AccountDAO = new AccountDAODatabase()

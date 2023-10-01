@@ -19,7 +19,7 @@ export type RequestRideParams = {
 
 // SRP - Single Responsibility Principle
 // Just one reason to change
-export default class RideService {
+export default class RequestRide {
   constructor(
     readonly rideDAO: RideDAO = new RideDAODatabase(),
     readonly accountDAO: AccountDAO = new AccountDAODatabase()
