@@ -2,6 +2,10 @@ import AccountService from '../services/AccountService'
 import RideService from '../services/RideService'
 import Postgres from '../database/postgres'
 import RideStatus from '../domain/RideStatus'
+import RequestRide from '../application/usecase/RequestRide'
+import AcceptRide from '../application/usecase/AcceptRide'
+import GetRide from '../application/usecase/GetRide'
+import StartRide from '../application/usecase/StartRide'
 
 describe('RideService', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,8 +51,8 @@ describe('RideService', () => {
   describe('requestRide', () => {
     test('should allow a passenger to request ride', async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      const output = await rideService.requestRide(input)
+      const requestRide = new RequestRide()
+      const output = await requestRide.execute(input)
       expect(output.rideId).toBeDefined()
     })
 
@@ -58,26 +62,27 @@ describe('RideService', () => {
         from: { lat: 0, long: 0 },
         to: { lat: 0, long: 0 }
       }
-      const rideService = new RideService()
-      await expect(() => rideService.requestRide(input)).rejects.toThrow(
+      const requestRide = new RequestRide()
+      await expect(() => requestRide.execute(input)).rejects.toThrow(
         new Error('Account is not from a passenger')
       )
     })
 
     test("shouldn't allow request new ride if passenger already have an uncompleted ride", async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      await rideService.requestRide(input)
-      await expect(() => rideService.requestRide(input)).rejects.toThrow(
+      const requestRide = new RequestRide()
+      await requestRide.execute(input)
+      await expect(() => requestRide.execute(input)).rejects.toThrow(
         new Error('This passenger already has an active ride')
       )
     })
 
     test('should set status as "requested"', async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      const output = await rideService.requestRide(input)
-      const ride = await rideService.getRide(output.rideId)
+      const requestRide = new RequestRide()
+      const output = await requestRide.execute(input)
+      const getRide = new GetRide()
+      const ride = await getRide.execute(output.rideId)
       expect(ride?.getStatus()).toBe(RideStatus.Requested)
     })
   })
@@ -85,27 +90,30 @@ describe('RideService', () => {
   describe('acceptRide', () => {
     it('should allow a driver to accept a ride', async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      const { rideId } = await rideService.requestRide(input)
-      await rideService.acceptRide({ driverId: driverAccountId, rideId })
-      const ride = await rideService.getRide(rideId)
+      const requestRide = new RequestRide()
+      const { rideId } = await requestRide.execute(input)
+      const acceptRide = new AcceptRide()
+      await acceptRide.execute({ driverId: driverAccountId, rideId })
+      const getRide = new GetRide()
+      const ride = await getRide.execute(rideId)
       expect(ride?.getStatus()).toBe('ACCEPTED')
       expect(ride?.driverId).toBe(driverAccountId)
     })
 
     it("shouldn't allow passenger to accept a ride", async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      const { rideId } = await rideService.requestRide(input)
+      const requestRide = new RequestRide()
+      const { rideId } = await requestRide.execute(input)
+      const acceptRide = new AcceptRide()
       await expect(() =>
-        rideService.acceptRide({ driverId: passengerAccountId, rideId })
+        acceptRide.execute({ driverId: passengerAccountId, rideId })
       ).rejects.toThrow(new Error('Only drivers can accept rides'))
     })
 
     it("shouldn't allow a driver to accept a ride if status isn't 'requested'", async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      const { rideId } = await rideService.requestRide(input)
+      const requestRide = new RequestRide()
+      const { rideId } = await requestRide.execute(input)
       const conn = Postgres.getConnection()
       try {
         conn.query(
@@ -115,8 +123,9 @@ describe('RideService', () => {
       } finally {
         conn.$pool.end()
       }
+      const acceptRide = new AcceptRide()
       await expect(() =>
-        rideService.acceptRide({ driverId: driverAccountId, rideId })
+        acceptRide.execute({ driverId: driverAccountId, rideId })
       ).rejects.toThrow(new Error('The ride is not requested'))
     })
 
@@ -129,17 +138,17 @@ describe('RideService', () => {
       })
       const firstRideInput = getPassengerInput(passengerAccountId)
       const secondRideInput = getPassengerInput(newPassengerId)
-      const rideService = new RideService()
-      const { rideId: firstRideId } =
-        await rideService.requestRide(firstRideInput)
-      await rideService.acceptRide({
+      const requestRide = new RequestRide()
+      const { rideId: firstRideId } = await requestRide.execute(firstRideInput)
+      const acceptRide = new AcceptRide()
+      await acceptRide.execute({
         driverId: driverAccountId,
         rideId: firstRideId
       })
       const { rideId: secondRideId } =
-        await rideService.requestRide(secondRideInput)
+        await requestRide.execute(secondRideInput)
       await expect(() =>
-        rideService.acceptRide({
+        acceptRide.execute({
           driverId: driverAccountId,
           rideId: secondRideId
         })
@@ -150,27 +159,31 @@ describe('RideService', () => {
   describe('startRide', () => {
     test('should allow a driver to start a ride when status is accepted', async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      const { rideId } = await rideService.requestRide(input)
-      await rideService.acceptRide({ driverId: driverAccountId, rideId })
-      await rideService.startRide(rideId)
-      const ride = await rideService.getRide(rideId)
+      const requestRide = new RequestRide()
+      const { rideId } = await requestRide.execute(input)
+      const acceptRide = new AcceptRide()
+      await acceptRide.execute({ driverId: driverAccountId, rideId })
+      const startRide = new StartRide()
+      await startRide.execute(rideId)
+      const getRide = new GetRide()
+      const ride = await getRide.execute(rideId)
       expect(ride?.getStatus()).toBe(RideStatus.InProgress)
     })
 
     test("shouldn't allow a driver to start a ride when status is different the accepted", async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      const { rideId } = await rideService.requestRide(input)
-      await expect(() => rideService.startRide(rideId)).rejects.toThrow(
+      const requestRide = new RequestRide()
+      const { rideId } = await requestRide.execute(input)
+      const startRide = new StartRide()
+      await expect(() => startRide.execute(rideId)).rejects.toThrow(
         new Error('The ride is not accepted')
       )
     })
 
     test.skip("shouldn't allow a driver to start a ride when ride doesn't exist", async () => {
-      const rideService = new RideService()
+      const startRide = new StartRide()
       await expect(() =>
-        rideService.startRide(crypto.randomUUID())
+        startRide.execute(crypto.randomUUID())
       ).rejects.toThrow(new Error('Ride not found'))
     })
   })
