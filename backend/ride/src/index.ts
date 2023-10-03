@@ -1,20 +1,21 @@
 // driver
 // adapter
 import express from 'express'
-import AccountService from './services/AccountService'
+import Signup from './application/usecase/Signup'
+import GetAccount from './application/usecase/GetAccount'
 const app = express()
 app.use(express.json())
 
 // port
-const accountService = new AccountService()
-
 app.post('/signup', async (req, res) => {
-  const result = await accountService.signup(req.body)
+  const signup = new Signup()
+  const result = await signup.execute(req.body)
   res.json(result)
 })
 
 app.get('/accounts/:accountId', async function (req, res) {
-  const output = await accountService.getAccount(req.params.accountId)
+  const getAccount = new GetAccount()
+  const output = await getAccount.execute(req.params.accountId)
   res.json(output)
 })
 
