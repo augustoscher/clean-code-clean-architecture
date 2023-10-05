@@ -1,8 +1,19 @@
-import RideDAODatabase from '../dao/ride/RideDAODatabase'
-import Ride from '../domain/Ride'
+import RideDAODatabase from '../../infra/repository/RideDAODatabase'
+import Ride from '../../domain/Ride'
+import PgPromiseAdapter from '../../infra/database/PgPromiseAdapter'
 
 describe('RideDAODatabase', () => {
-  const rideDAO = new RideDAODatabase()
+  let rideDAO: RideDAODatabase
+  let connection: PgPromiseAdapter
+
+  beforeEach(() => {
+    connection = new PgPromiseAdapter()
+    rideDAO = new RideDAODatabase(connection)
+  })
+
+  afterEach(async function () {
+    await connection.close()
+  })
 
   it('should create ride and get by id', async () => {
     const rideEntity = Ride.create({

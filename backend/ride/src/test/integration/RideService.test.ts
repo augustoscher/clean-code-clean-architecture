@@ -1,18 +1,29 @@
-import RideService from '../services/RideService'
-import Postgres from '../database/postgres'
-import RideStatus from '../domain/RideStatus'
-import RequestRide from '../application/usecase/RequestRide'
-import AcceptRide from '../application/usecase/AcceptRide'
-import GetRide from '../application/usecase/GetRide'
-import StartRide from '../application/usecase/StartRide'
-import Signup from '../application/usecase/Signup'
+import RideService from '../../services/RideService'
+import Postgres from '../../database/postgres'
+import RideStatus from '../../domain/RideStatus'
+import RequestRide from '../../application/usecase/RequestRide'
+import AcceptRide from '../../application/usecase/AcceptRide'
+import GetRide from '../../application/usecase/GetRide'
+import StartRide from '../../application/usecase/StartRide'
+import Signup from '../../application/usecase/Signup'
+import AccountBuilder from './AccountBuilder'
+import PgPromiseAdapter from '../../infra/database/PgPromiseAdapter'
+import AccountDAODatabase from '../../infra/repository/AccountDAODatabase'
+import RideDAODatabase from '../../infra/repository/RideDAODatabase'
+import UpdatePosition from '../../application/usecase/UpdatePosition'
+import PositionDAODatabase from '../../infra/repository/PositionDAODatabase'
 
 describe('RideService', () => {
+  let connection: PgPromiseAdapter
+  let accountDAO: AccountDAODatabase
+  let rideDAO: RideDAODatabase
+  let positionDAO: PositionDAODatabase
   let requestRide: RequestRide
   let acceptRide: AcceptRide
   let getRide: GetRide
   let startRide: StartRide
   let signup: Signup
+  let updatePosition: UpdatePosition
   let passengerAccountId: string
   let driverAccountId: string
 
@@ -22,37 +33,32 @@ describe('RideService', () => {
     to: { lat: 0, long: 0 }
   })
 
-  beforeAll(async () => {
-    requestRide = new RequestRide()
-    acceptRide = new AcceptRide()
-    getRide = new GetRide()
-    startRide = new StartRide()
-    signup = new Signup()
+  beforeEach(async () => {
+    connection = new PgPromiseAdapter()
+    await connection.query('delete from cccat13.ride')
 
-    const { accountId: passengerId } = await signup.execute({
-      name: 'John Doe',
-      email: `john.doe${Math.random()}@gmail.com`,
-      cpf: '95818705552',
-      isPassenger: true,
-      isDriver: false,
-      carPlate: ''
-    })
-    const { accountId: driverId } = await signup.execute({
-      name: 'John Doe',
-      email: `john.doe${Math.random()}@gmail.com`,
-      cpf: '95818705552',
-      isPassenger: false,
-      isDriver: true,
-      carPlate: 'AAA9999'
-    })
+    accountDAO = new AccountDAODatabase(connection)
+    rideDAO = new RideDAODatabase(connection)
+    positionDAO = new PositionDAODatabase(connection)
+    requestRide = new RequestRide(rideDAO, accountDAO)
+    acceptRide = new AcceptRide(rideDAO, accountDAO)
+    getRide = new GetRide(rideDAO)
+    startRide = new StartRide(rideDAO)
+    signup = new Signup(accountDAO)
+    updatePosition = new UpdatePosition(rideDAO, positionDAO)
+
+    const { accountId: passengerId } = await signup.execute(
+      AccountBuilder.anAccount().asPassenger().build()
+    )
+    const { accountId: driverId } = await signup.execute(
+      AccountBuilder.anAccount().asDriver().build()
+    )
     passengerAccountId = passengerId
     driverAccountId = driverId
   })
 
-  beforeEach(async () => {
-    const connection = Postgres.getConnection()
-    await connection.query('delete from cccat13.ride')
-    await connection.$pool.end()
+  afterEach(async function () {
+    await connection.close()
   })
 
   describe('requestRide', () => {
@@ -179,16 +185,16 @@ describe('RideService', () => {
   describe('updatePosition', () => {
     test('should update position when ride is in progress', async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      const { rideId } = await rideService.requestRide(input)
-      await rideService.acceptRide({ driverId: driverAccountId, rideId })
-      await rideService.startRide(rideId)
+      // const rideService = new RideService()
+      const { rideId } = await requestRide.execute(input)
+      await acceptRide.execute({ driverId: driverAccountId, rideId })
+      await startRide.execute(rideId)
       const positionInput = {
         rideId,
         lat: -26.913061443489774,
         long: -49.080980464673274
       }
-      await rideService.updatePosition(positionInput)
+      await updatePosition.execute(positionInput)
       const positions = await rideService.getRidePositions(rideId)
       expect(positions.length).toBe(1)
       expect(positions[0]?.position_id).toBeDefined()
@@ -198,10 +204,9 @@ describe('RideService', () => {
 
     test("shouldn't update position when ride is not in progress", async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      const { rideId } = await rideService.requestRide(input)
+      const { rideId } = await requestRide.execute(input)
       await await expect(() =>
-        rideService.updatePosition({
+        updatePosition.execute({
           rideId,
           lat: -26.913061443489774,
           long: -49.080980464673274
@@ -210,9 +215,8 @@ describe('RideService', () => {
     })
 
     test.skip("shouldn't update position when ride doesn't exist", async () => {
-      const rideService = new RideService()
       await await expect(() =>
-        rideService.updatePosition({
+        updatePosition.execute({
           rideId: crypto.randomUUID(),
           lat: -26.913061443489774,
           long: -49.080980464673274
