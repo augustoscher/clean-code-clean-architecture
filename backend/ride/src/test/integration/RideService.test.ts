@@ -1,5 +1,3 @@
-import RideService from '../../services/RideService'
-import Postgres from '../../database/postgres'
 import RideStatus from '../../domain/RideStatus'
 import RequestRide from '../../application/usecase/RequestRide'
 import AcceptRide from '../../application/usecase/AcceptRide'
@@ -13,6 +11,8 @@ import RideDAODatabase from '../../infra/repository/RideDAODatabase'
 import UpdatePosition from '../../application/usecase/UpdatePosition'
 import PositionDAODatabase from '../../infra/repository/PositionDAODatabase'
 import GetRidePositions from '../../application/usecase/GetRidePositions'
+import FinishRide from '../../application/usecase/FinishRide'
+import DistanceCalculatorImpl from '../../domain/distance/DistanceCalculatorStraightLine'
 
 describe('RideService', () => {
   let connection: PgPromiseAdapter
@@ -23,6 +23,7 @@ describe('RideService', () => {
   let acceptRide: AcceptRide
   let getRide: GetRide
   let startRide: StartRide
+  let finishRide: FinishRide
   let signup: Signup
   let updatePosition: UpdatePosition
   let getRidePositions: GetRidePositions
@@ -44,6 +45,11 @@ describe('RideService', () => {
     positionDAO = new PositionDAODatabase(connection)
     requestRide = new RequestRide(rideDAO, accountDAO)
     acceptRide = new AcceptRide(rideDAO, accountDAO)
+    finishRide = new FinishRide(
+      rideDAO,
+      positionDAO,
+      new DistanceCalculatorImpl()
+    )
     getRide = new GetRide(rideDAO)
     startRide = new StartRide(rideDAO)
     signup = new Signup(accountDAO)
@@ -119,15 +125,10 @@ describe('RideService', () => {
     it("shouldn't allow a driver to accept a ride if status isn't 'requested'", async () => {
       const input = getPassengerInput(passengerAccountId)
       const { rideId } = await requestRide.execute(input)
-      const conn = Postgres.getConnection()
-      try {
-        conn.query(
-          "update cccat13.ride set status = 'CANCELED' where ride_id = $1",
-          [rideId]
-        )
-      } finally {
-        conn.$pool.end()
-      }
+      connection.query(
+        "update cccat13.ride set status = 'CANCELED' where ride_id = $1",
+        [rideId]
+      )
       await expect(() =>
         acceptRide.execute({ driverId: driverAccountId, rideId })
       ).rejects.toThrow(new Error('The ride is not requested'))
@@ -229,9 +230,8 @@ describe('RideService', () => {
 
   describe('finishRide', () => {
     test.skip("shouldn't allow finish ride when ride doesn't exists", async () => {
-      const rideService = new RideService()
-      await await expect(() =>
-        rideService.finishRide(crypto.randomUUID())
+      await expect(() =>
+        finishRide.execute(crypto.randomUUID())
       ).rejects.toThrow(new Error('Ride not found'))
     })
 
