@@ -12,6 +12,7 @@ import AccountDAODatabase from '../../infra/repository/AccountDAODatabase'
 import RideDAODatabase from '../../infra/repository/RideDAODatabase'
 import UpdatePosition from '../../application/usecase/UpdatePosition'
 import PositionDAODatabase from '../../infra/repository/PositionDAODatabase'
+import GetRidePositions from '../../application/usecase/GetRidePositions'
 
 describe('RideService', () => {
   let connection: PgPromiseAdapter
@@ -24,6 +25,7 @@ describe('RideService', () => {
   let startRide: StartRide
   let signup: Signup
   let updatePosition: UpdatePosition
+  let getRidePositions: GetRidePositions
   let passengerAccountId: string
   let driverAccountId: string
 
@@ -46,6 +48,7 @@ describe('RideService', () => {
     startRide = new StartRide(rideDAO)
     signup = new Signup(accountDAO)
     updatePosition = new UpdatePosition(rideDAO, positionDAO)
+    getRidePositions = new GetRidePositions(positionDAO)
 
     const { accountId: passengerId } = await signup.execute(
       AccountBuilder.anAccount().asPassenger().build()
@@ -185,7 +188,6 @@ describe('RideService', () => {
   describe('updatePosition', () => {
     test('should update position when ride is in progress', async () => {
       const input = getPassengerInput(passengerAccountId)
-      // const rideService = new RideService()
       const { rideId } = await requestRide.execute(input)
       await acceptRide.execute({ driverId: driverAccountId, rideId })
       await startRide.execute(rideId)
@@ -195,7 +197,7 @@ describe('RideService', () => {
         long: -49.080980464673274
       }
       await updatePosition.execute(positionInput)
-      const positions = await rideService.getRidePositions(rideId)
+      const positions = await getRidePositions.execute(rideId)
       expect(positions.length).toBe(1)
       expect(positions[0]?.position_id).toBeDefined()
       expect(positions[0]?.lat).toBe(positionInput.lat)
@@ -235,31 +237,29 @@ describe('RideService', () => {
 
     test("shouldn't allow finish ride when ride is not in progress", async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      const { rideId } = await rideService.requestRide(input)
-      await expect(() => rideService.finishRide(rideId)).rejects.toThrow(
+      const { rideId } = await requestRide.execute(input)
+      await expect(() => finishRide.execute(rideId)).rejects.toThrow(
         new Error('The ride is not in progress')
       )
     })
 
     test('should finish ride and update status, distance and fare', async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      const { rideId } = await rideService.requestRide(input)
-      await rideService.acceptRide({ driverId: driverAccountId, rideId })
-      await rideService.startRide(rideId)
-      await rideService.updatePosition({
+      const { rideId } = await requestRide.execute(input)
+      await acceptRide.execute({ driverId: driverAccountId, rideId })
+      await startRide.execute(rideId)
+      await updatePosition.execute({
         rideId,
         lat: -26.91448020906993,
         long: -49.09012857447635
       })
-      await rideService.updatePosition({
+      await updatePosition.execute({
         rideId,
         lat: -28.117481138039185,
         long: -54.83625057524163
       })
-      await rideService.finishRide(rideId)
-      const ride = await rideService.getRide(rideId)
+      await finishRide.execute(rideId)
+      const ride = await getRide.execute(rideId)
       expect(ride?.getStatus()).toBe(RideStatus.Completed)
       expect(ride?.distance).toBe(582.1429498711539)
       expect(ride?.fare).toBe(1222.5001947294231)
@@ -267,27 +267,26 @@ describe('RideService', () => {
 
     test('should finish ride with many positions', async () => {
       const input = getPassengerInput(passengerAccountId)
-      const rideService = new RideService()
-      const { rideId } = await rideService.requestRide(input)
-      await rideService.acceptRide({ driverId: driverAccountId, rideId })
-      await rideService.startRide(rideId)
-      await rideService.updatePosition({
+      const { rideId } = await requestRide.execute(input)
+      await acceptRide.execute({ driverId: driverAccountId, rideId })
+      await startRide.execute(rideId)
+      await updatePosition.execute({
         rideId,
         lat: -26.91448020906993,
         long: -49.09012857447635
       })
-      await rideService.updatePosition({
+      await updatePosition.execute({
         rideId,
         lat: -26.920592021792398,
         long: -49.06919226098154
       })
-      await rideService.updatePosition({
+      await updatePosition.execute({
         rideId,
         lat: -28.117481138039185,
         long: -54.83625057524163
       })
-      await rideService.finishRide(rideId)
-      const ride = await rideService.getRide(rideId)
+      await finishRide.execute(rideId)
+      const ride = await getRide.execute(rideId)
       expect(ride?.getStatus()).toBe(RideStatus.Completed)
       expect(ride?.distance).toBe(586.165527079648)
       expect(ride?.fare).toBe(1230.947606867261)
