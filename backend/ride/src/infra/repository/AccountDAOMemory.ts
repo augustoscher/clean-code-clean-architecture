@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // resource - driven actor
 // adapter
+import AccountDAO from '../../application/repository/AccountDAO'
 import Account from '../../domain/Account'
-import AccountDAO from './AccountDAO'
 
 export default class AccountDAOMemory implements AccountDAO {
   accounts: Account[] = []
