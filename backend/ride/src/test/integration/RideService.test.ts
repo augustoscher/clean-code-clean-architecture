@@ -135,14 +135,9 @@ describe('RideService', () => {
     })
 
     it("shouldn't allow a driver to accept a ride if driver already have another ride with status 'accepted' or 'in_progress'", async () => {
-      const { accountId: newPassengerId } = await signup.execute({
-        name: 'John Doe',
-        email: `john.doe${Math.random()}@gmail.com`,
-        cpf: '95818705552',
-        isPassenger: true,
-        isDriver: false,
-        carPlate: ''
-      })
+      const { accountId: newPassengerId } = await signup.execute(
+        AccountBuilder.anAccount().asPassenger().build()
+      )
       const firstRideInput = getPassengerInput(passengerAccountId)
       const secondRideInput = getPassengerInput(newPassengerId)
       const { rideId: firstRideId } = await requestRide.execute(firstRideInput)
