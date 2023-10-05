@@ -1,25 +1,14 @@
-// driver
-// adapter
-import express from 'express'
 import Signup from './application/usecase/Signup'
 import GetAccount from './application/usecase/GetAccount'
-const app = express()
-app.use(express.json())
+import PgPromiseAdapter from './infra/database/PgPromiseAdapter'
+import AccountDAODatabase from './infra/repository/AccountDAODatabase'
+import ExpressAdapter from './infra/http/ExpressAdapter'
+import MainController from './infra/controller/MainController'
 
-// port
-app.post('/signup', async (req, res) => {
-  const signup = new Signup()
-  const result = await signup.execute(req.body)
-  res.json(result)
-})
-
-app.get('/accounts/:accountId', async function (req, res) {
-  const getAccount = new GetAccount()
-  const output = await getAccount.execute(req.params.accountId)
-  res.json(output)
-})
-
-const port = 3000
-app.listen(port, () => {
-  console.log(`App listening on port ${port}`)
-})
+const connection = new PgPromiseAdapter()
+const accountDAO = new AccountDAODatabase(connection)
+const signup = new Signup(accountDAO)
+const getAccount = new GetAccount(accountDAO)
+const httpServer = new ExpressAdapter()
+new MainController(httpServer, signup, getAccount)
+httpServer.listen(3000)
