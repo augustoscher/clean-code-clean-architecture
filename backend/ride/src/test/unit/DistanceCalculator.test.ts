@@ -1,4 +1,4 @@
-import DistanceCalculator from '../distance/DistanceCalculatorStraightLine'
+import DistanceCalculator from '../../distance/DistanceCalculatorStraightLine'
 
 describe('DistanceCalculatorStraightLine', () => {
   test.each([
