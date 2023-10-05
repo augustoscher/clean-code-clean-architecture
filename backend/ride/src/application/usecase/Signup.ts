@@ -1,7 +1,6 @@
-import AccountDAO from '../../dao/account/AccountDAO'
-import MailerGateway from '../../gateway/MailerGateway'
-import AccountDAODatabase from '../../dao/account/AccountDAODatabase'
+import AccountDAO from '../repository/AccountDAO'
 import Account from '../../domain/Account'
+import MailerGateway from '../../gateway/MailerGateway'
 
 export type SignupParams = {
   name: string
@@ -16,7 +15,7 @@ export default class Signup {
   mailerGateway: MailerGateway
 
   // creating a port for more than one adapter to implement, allowing me to vary the behavior
-  constructor(readonly accountDAO: AccountDAO = new AccountDAODatabase()) {
+  constructor(readonly accountDAO: AccountDAO) {
     this.mailerGateway = new MailerGateway()
   }
 

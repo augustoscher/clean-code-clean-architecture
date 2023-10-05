@@ -1,9 +1,8 @@
-import RideDAO from '../../dao/ride/RideDAO'
-import RideDAODatabase from '../../dao/ride/RideDAODatabase'
+import RideDAO from '../repository/RideDAO'
 import RideStatus from '../../domain/RideStatus'
 
 export default class StartRide {
-  constructor(readonly rideDAO: RideDAO = new RideDAODatabase()) {}
+  constructor(readonly rideDAO: RideDAO) {}
 
   async execute(rideId: string) {
     const ride = await this.rideDAO.getById(rideId)

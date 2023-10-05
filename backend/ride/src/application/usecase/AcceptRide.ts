@@ -1,7 +1,5 @@
-import AccountDAO from '../../dao/account/AccountDAO'
-import AccountDAODatabase from '../../dao/account/AccountDAODatabase'
-import RideDAO from '../../dao/ride/RideDAO'
-import RideDAODatabase from '../../dao/ride/RideDAODatabase'
+import AccountDAO from '../repository/AccountDAO'
+import RideDAO from '../repository/RideDAO'
 
 export type AcceptRideParams = {
   driverId: string
@@ -10,8 +8,8 @@ export type AcceptRideParams = {
 
 export default class AcceptRide {
   constructor(
-    readonly rideDAO: RideDAO = new RideDAODatabase(),
-    readonly accountDAO: AccountDAO = new AccountDAODatabase()
+    readonly rideDAO: RideDAO,
+    readonly accountDAO: AccountDAO
   ) {}
 
   async execute({ driverId, rideId }: AcceptRideParams) {

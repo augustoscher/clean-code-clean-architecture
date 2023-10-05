@@ -1,7 +1,5 @@
-import AccountDAO from '../../dao/account/AccountDAO'
-import AccountDAODatabase from '../../dao/account/AccountDAODatabase'
-import RideDAO from '../../dao/ride/RideDAO'
-import RideDAODatabase from '../../dao/ride/RideDAODatabase'
+import AccountDAO from '../repository/AccountDAO'
+import RideDAO from '../repository/RideDAO'
 import Ride from '../../domain/Ride'
 
 // type refers to data structure. Interfaces are better when we have some behavior to implement.
@@ -21,8 +19,8 @@ export type RequestRideParams = {
 // Just one reason to change
 export default class RequestRide {
   constructor(
-    readonly rideDAO: RideDAO = new RideDAODatabase(),
-    readonly accountDAO: AccountDAO = new AccountDAODatabase()
+    readonly rideDAO: RideDAO,
+    readonly accountDAO: AccountDAO
   ) {}
 
   async execute({ passengerId, from, to }: RequestRideParams) {
