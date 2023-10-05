@@ -9,11 +9,7 @@ export default class StartRide {
     if (!ride) throw new Error('Ride not found')
     if (ride.getStatus() != RideStatus.Accepeted)
       throw new Error('The ride is not accepted')
-    const updatedRide = {
-      rideId,
-      driverId: ride.driverId,
-      status: RideStatus.InProgress
-    }
-    await this.rideDAO.update(updatedRide)
+    ride.start()
+    await this.rideDAO.update(ride)
   }
 }
