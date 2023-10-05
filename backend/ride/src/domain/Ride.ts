@@ -24,6 +24,8 @@ export type RestoreRideParams = {
 
 export default class Ride {
   driverId?: string
+  distance?: number
+  fare?: number
 
   private constructor(
     readonly rideId: string,
@@ -34,9 +36,12 @@ export default class Ride {
     readonly toLat: number,
     readonly toLong: number,
     readonly date: Date,
-    readonly distance: number,
-    readonly fare: number
-  ) {}
+    distance: number = 0,
+    fare: number = 0
+  ) {
+    this.distance = distance
+    this.fare = fare
+  }
 
   static create({
     passengerId,
@@ -56,9 +61,7 @@ export default class Ride {
       fromLong,
       toLat,
       toLong,
-      date,
-      0,
-      0
+      date
     )
   }
 
@@ -102,6 +105,14 @@ export default class Ride {
     if (this.status !== RideStatus.Accepeted)
       throw new Error('The ride is not accepted')
     this.status = RideStatus.InProgress
+  }
+
+  finish(distance: number, fare: number) {
+    if (this.status !== RideStatus.InProgress)
+      throw new Error('The ride is not in progress')
+    this.status = RideStatus.Completed
+    this.distance = distance
+    this.fare = fare
   }
 
   getStatus() {
