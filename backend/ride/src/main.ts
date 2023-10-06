@@ -5,6 +5,7 @@ import AccountDAODatabase from './infra/repository/AccountDAODatabase'
 import ExpressAdapter from './infra/http/ExpressAdapter'
 import MainController from './infra/controller/MainController'
 
+// Composition root pattern. Dependency injection. Knows all dependencies and injects them
 const connection = new PgPromiseAdapter()
 const accountDAO = new AccountDAODatabase(connection)
 const signup = new Signup(accountDAO)
