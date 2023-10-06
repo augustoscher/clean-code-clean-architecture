@@ -3,6 +3,7 @@ import pgp from 'pg-promise'
 
 import Connection from './Connection'
 
+// Adapter design pattern
 export default class PgPromiseAdapter implements Connection {
   connection: any
 
