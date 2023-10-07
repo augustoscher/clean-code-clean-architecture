@@ -23,3 +23,19 @@ Execute create table script:
 ```
 PGPASSWORD=123456 psql -h localhost -p 5432 -U postgres  -d app -f create.sql
 ```
+
+## Run locally
+
+To run backend/ride service locally, follow steps below:
+
+1. Install dependencies
+
+```
+yarn install
+```
+
+2. Run application
+
+```
+yarn dev
+```
