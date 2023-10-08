@@ -1,4 +1,5 @@
 import Base from 'templates/Base'
+import './globals.css'
 import { Suspense } from 'react'
 import Loading from './loading'
 
