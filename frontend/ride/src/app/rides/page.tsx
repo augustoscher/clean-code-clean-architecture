@@ -5,5 +5,5 @@ export default async function ServerComponentPage() {
     <div>
       <h1>Rides list</h1>
     </div>
-  );
+  )
 }
