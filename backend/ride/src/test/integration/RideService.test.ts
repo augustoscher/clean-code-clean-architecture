@@ -4,6 +4,7 @@ import AcceptRide from '../../application/usecase/AcceptRide'
 import GetRide from '../../application/usecase/GetRide'
 import StartRide from '../../application/usecase/StartRide'
 import ListRides from '../../application/usecase/ListRides'
+import ListDetailedRides from '../../application/usecase/ListDetailedRides'
 import Signup from '../../application/usecase/Signup'
 import AccountBuilder from './AccountBuilder'
 import PgPromiseAdapter from '../../infra/database/PgPromiseAdapter'
@@ -25,6 +26,7 @@ describe('RideService', () => {
   let getRide: GetRide
   let startRide: StartRide
   let listRides: ListRides
+  let listDetailedRides: ListDetailedRides
   let finishRide: FinishRide
   let signup: Signup
   let updatePosition: UpdatePosition
@@ -55,6 +57,7 @@ describe('RideService', () => {
     getRide = new GetRide(rideDAO)
     startRide = new StartRide(rideDAO)
     listRides = new ListRides(rideDAO)
+    listDetailedRides = new ListDetailedRides(rideDAO, accountDAO)
     signup = new Signup(accountDAO)
     updatePosition = new UpdatePosition(rideDAO, positionDAO)
     getRidePositions = new GetRidePositions(positionDAO)
@@ -297,6 +300,32 @@ describe('RideService', () => {
       await requestRide.execute(input)
       const rides = await listRides.execute()
       expect(rides.length).toBe(1)
+    })
+  })
+
+  describe('listDetailedRides', () => {
+    test('should list all rides with details', async () => {
+      const input = getPassengerInput(passengerAccountId)
+      await requestRide.execute(input)
+      const rides = await listDetailedRides.execute()
+      expect(rides.length).toBe(1)
+      const [ride] = rides
+      console.log(ride)
+      expect(ride.passenger).toBeDefined()
+      expect(ride.date).toBeDefined()
+      expect(ride.fare).toBeDefined()
+    })
+
+    test('should list two rides', async () => {
+      const input = getPassengerInput(passengerAccountId)
+      const { accountId: secondPassengerId } = await signup.execute(
+        AccountBuilder.anAccount().asPassenger().build()
+      )
+      const input2 = getPassengerInput(secondPassengerId)
+      await requestRide.execute(input)
+      await requestRide.execute(input2)
+      const rides = await listDetailedRides.execute()
+      expect(rides.length).toBe(2)
     })
   })
 })
