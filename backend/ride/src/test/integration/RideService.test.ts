@@ -3,6 +3,7 @@ import RequestRide from '../../application/usecase/RequestRide'
 import AcceptRide from '../../application/usecase/AcceptRide'
 import GetRide from '../../application/usecase/GetRide'
 import StartRide from '../../application/usecase/StartRide'
+import ListRides from '../../application/usecase/ListRides'
 import Signup from '../../application/usecase/Signup'
 import AccountBuilder from './AccountBuilder'
 import PgPromiseAdapter from '../../infra/database/PgPromiseAdapter'
@@ -23,6 +24,7 @@ describe('RideService', () => {
   let acceptRide: AcceptRide
   let getRide: GetRide
   let startRide: StartRide
+  let listRides: ListRides
   let finishRide: FinishRide
   let signup: Signup
   let updatePosition: UpdatePosition
@@ -52,6 +54,7 @@ describe('RideService', () => {
     )
     getRide = new GetRide(rideDAO)
     startRide = new StartRide(rideDAO)
+    listRides = new ListRides(rideDAO)
     signup = new Signup(accountDAO)
     updatePosition = new UpdatePosition(rideDAO, positionDAO)
     getRidePositions = new GetRidePositions(positionDAO)
@@ -285,6 +288,15 @@ describe('RideService', () => {
       expect(ride?.getStatus()).toBe(RideStatus.Completed)
       expect(ride?.distance).toBe(586.165527079648)
       expect(ride?.fare).toBe(1230.947606867261)
+    })
+  })
+
+  describe('listRides', () => {
+    test('should list all rides', async () => {
+      const input = getPassengerInput(passengerAccountId)
+      await requestRide.execute(input)
+      const rides = await listRides.execute()
+      expect(rides.length).toBe(1)
     })
   })
 })
