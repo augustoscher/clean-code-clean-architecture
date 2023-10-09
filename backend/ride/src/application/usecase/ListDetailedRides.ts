@@ -24,13 +24,12 @@ export default class ListDetailedRides {
   async execute() {
     this.accountCache = new Map()
     const rides = await this.rideDAO.getAll()
-    return await Promise.all(
+    return Promise.all(
       rides.map(async ride => ({
         passenger: await this.getAccountName(ride.passengerId),
-        driver: ride.driverId
-          ? await this.getAccountName(ride.driverId)
-          : undefined,
+        driver: ride.driverId ? await this.getAccountName(ride.driverId) : '',
         date: ride.date,
+        status: ride.getStatus(),
         distance: ride.distance,
         fare: ride.fare
       }))
