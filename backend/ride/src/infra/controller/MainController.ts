@@ -2,13 +2,17 @@
 import GetAccount from '../../application/usecase/GetAccount'
 import HttpServer from '../http/HttpServer'
 import Signup from '../../application/usecase/Signup'
+import GetRide from '../../application/usecase/GetRide'
+import ListRides from '../../application/usecase/ListRides'
 
 // interface adapter
 export default class MainController {
   constructor(
     readonly httpServer: HttpServer,
     signup: Signup,
-    getAccount: GetAccount
+    getAccount: GetAccount,
+    getRide: GetRide,
+    listRides: ListRides
   ) {
     httpServer.on('post', '/signup', async function (params: any, body: any) {
       const output = await signup.execute(body)
@@ -17,6 +21,16 @@ export default class MainController {
 
     httpServer.on('get', '/accounts/:accountId', async function (params: any) {
       const output = await getAccount.execute(params.accountId)
+      return output
+    })
+
+    httpServer.on('get', '/rides', async function () {
+      const output = await listRides.execute()
+      return output
+    })
+
+    httpServer.on('get', '/rides/:rideId', async function (params: any) {
+      const output = await getRide.execute(params.rideId)
       return output
     })
   }

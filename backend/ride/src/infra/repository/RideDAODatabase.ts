@@ -30,6 +30,25 @@ export default class RideDAODatabase implements RideDAO {
     )
   }
 
+  async getAll(): Promise<Ride[] | []> {
+    const ridesData = await this.connection.query('select * from cccat13.ride')
+    return ridesData.map((rideData: any) =>
+      Ride.restore({
+        rideId: rideData.ride_id,
+        passengerId: rideData.passenger_id,
+        driverId: rideData.driver_id,
+        fromLat: Number(rideData.from_lat),
+        fromLong: Number(rideData.from_long),
+        toLat: Number(rideData.to_lat),
+        toLong: Number(rideData.to_long),
+        status: rideData.status as RideStatus,
+        distance: Number(rideData.distance),
+        fare: Number(rideData.fare),
+        date: rideData.date
+      })
+    )
+  }
+
   async getById(rideId: string): Promise<Ride> {
     const [rideData] = await this.connection.query(
       'select * from cccat13.ride where ride_id = $1',
