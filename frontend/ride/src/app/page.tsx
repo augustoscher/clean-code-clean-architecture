@@ -15,7 +15,7 @@ export default function Index() {
         <Link href={{ pathname: 'driver/ride' }}>Accept Ride</Link>
       </p>
       <p>
-        <Link href={{ pathname: 'rides' }}>Check All Rides</Link>
+        <Link href={{ pathname: 'rides' }}>All Rides</Link>
       </p>
     </>
   )
