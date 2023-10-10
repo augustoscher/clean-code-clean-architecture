@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import HttpClient from 'application/http/client'
-import RideClient from 'application/repository/ride'
+import RideClient from 'application/repository/Ride'
 import Ride from 'domain/Ride'
 import RideStatus from 'domain/RideStatus'
 

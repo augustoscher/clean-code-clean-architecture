@@ -1,4 +1,4 @@
-import RideClient from 'application/repository/ride'
+import RideClient from 'application/repository/Ride'
 import UseCase from './UseCase'
 
 export default class GetRide implements UseCase {
