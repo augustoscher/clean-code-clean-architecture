@@ -26,6 +26,7 @@ export default class ListDetailedRides {
     const rides = await this.rideDAO.getAll()
     return Promise.all(
       rides.map(async ride => ({
+        rideId: ride.rideId,
         passenger: await this.getAccountName(ride.passengerId),
         driver: ride.driverId ? await this.getAccountName(ride.driverId) : '',
         date: ride.date,
