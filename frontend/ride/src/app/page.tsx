@@ -1,22 +1,42 @@
+import Grid from 'components/Grid'
 import Heading from 'components/Heading'
 import Link from 'next/link'
+
+type BoxProps = {
+  children: React.ReactNode
+}
+const Box = ({ children }: BoxProps) => (
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '200px',
+      border: '1px solid #dbdbdb'
+    }}
+  >
+    {children}
+  </div>
+)
 
 export default function Index() {
   return (
     <>
       <Heading size="medium">Home Page</Heading>
-      <p>
-        <Link href={{ pathname: 'account' }}>Create Account</Link>
-      </p>
-      <p>
-        <Link href={{ pathname: 'passenger/ride' }}>Request Ride</Link>
-      </p>
-      <p>
-        <Link href={{ pathname: 'driver/ride' }}>Accept Ride</Link>
-      </p>
-      <p>
-        <Link href={{ pathname: 'rides' }}>All Rides</Link>
-      </p>
+      <Grid>
+        <Box>
+          <Link href={{ pathname: 'account' }}>Create Account</Link>
+        </Box>
+        <Box>
+          <Link href={{ pathname: 'passenger/ride' }}>Request Ride</Link>
+        </Box>
+        <Box>
+          <Link href={{ pathname: 'driver/ride' }}>Accept Ride</Link>
+        </Box>
+        <Box>
+          <Link href={{ pathname: 'rides' }}>Rides list</Link>
+        </Box>
+      </Grid>
     </>
   )
 }

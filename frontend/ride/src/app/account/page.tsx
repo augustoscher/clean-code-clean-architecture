@@ -10,9 +10,9 @@ export default async function ServerComponentPage() {
 
   return (
     <div>
-      <h1>Account Page</h1>
+      <h1>Create Page</h1>
     </div>
-  );
+  )
 }
 
 // <>
