@@ -1,0 +1,15 @@
+.content {
+  margin-top: 32px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 350px;
+
+  > input,
+  select {
+    margin-bottom: 16px;
+  }
+}

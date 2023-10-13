@@ -1,6 +1,7 @@
 import Grid from 'components/Grid'
 import Heading from 'components/Heading'
 import Link from 'next/link'
+import styles from './page.module.scss'
 
 type BoxProps = {
   children: React.ReactNode
@@ -23,20 +24,22 @@ export default function Index() {
   return (
     <>
       <Heading size="medium">Home Page</Heading>
-      <Grid>
-        <Box>
-          <Link href={{ pathname: 'account' }}>Create Account</Link>
-        </Box>
-        <Box>
-          <Link href={{ pathname: 'passenger/ride' }}>Request Ride</Link>
-        </Box>
-        <Box>
-          <Link href={{ pathname: 'driver/ride' }}>Accept Ride</Link>
-        </Box>
-        <Box>
-          <Link href={{ pathname: 'rides' }}>Rides list</Link>
-        </Box>
-      </Grid>
+      <div className={styles.content}>
+        <Grid>
+          <Box>
+            <Link href={{ pathname: 'signup' }}>Signup</Link>
+          </Box>
+          <Box>
+            <Link href={{ pathname: 'passenger/ride' }}>Request Ride</Link>
+          </Box>
+          <Box>
+            <Link href={{ pathname: 'driver/ride' }}>Accept Ride</Link>
+          </Box>
+          <Box>
+            <Link href={{ pathname: 'rides' }}>Rides list</Link>
+          </Box>
+        </Grid>
+      </div>
     </>
   )
 }
