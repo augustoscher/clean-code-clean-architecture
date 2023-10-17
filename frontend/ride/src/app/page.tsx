@@ -30,6 +30,9 @@ export default function Index() {
             <Link href={{ pathname: 'signup' }}>Signup</Link>
           </Box>
           <Box>
+            <Link href={{ pathname: 'accounts' }}>Accounts list</Link>
+          </Box>
+          <Box>
             <Link href={{ pathname: 'passenger/ride' }}>Request Ride</Link>
           </Box>
           <Box>

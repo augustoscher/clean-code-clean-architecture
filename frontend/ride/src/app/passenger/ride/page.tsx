@@ -1,40 +1,10 @@
-// import Link from 'next/link'
+import Heading from 'components/Heading'
+import styles from './Page.module.scss'
 
-// import Heading from 'components/Heading'
-// import { fetchPokemon } from './fetch'
-
-// import styles from "./Page.module.scss";
-
-export default async function ServerComponentPage() {
-  // const pokemons = await fetchPokemon()
-
+export default async function PassengerRequestRidePage() {
   return (
     <div>
-      <h1>Passenger Ride Page</h1>
+      <Heading>Passenger Ride Page</Heading>
     </div>
-  );
+  )
 }
-
-// <>
-// <Heading size="medium">Pokemons</Heading>
-
-// <div className={styles.subtitle}>
-//   <p>Example of graphql pokemons request in a server components</p>
-// </div>
-
-// <div>
-//   {pokemons.map(({ id, name, classification }) => {
-//     return (
-//       <Link
-//         key={id}
-//         href={{ pathname: `/pokemons/${name.toLowerCase()}` }}
-//       >
-//         <div className={styles.listItem}>
-//           <p>Name: {name}</p>
-//           <p>Class: {classification}</p>
-//         </div>
-//       </Link>
-//     )
-//   })}
-// </div>
-// </>
