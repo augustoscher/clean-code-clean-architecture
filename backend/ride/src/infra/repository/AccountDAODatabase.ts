@@ -60,4 +60,24 @@ export default class AccountDAODatabase implements AccountDAO {
       verificationCode: account.verification_code
     })
   }
+
+  async getAll(): Promise<Account[] | []> {
+    const accountsData = await this.connection.query(
+      'select * from cccat13.account'
+    )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return accountsData.map((accountData: any) =>
+      Account.restore({
+        accountId: accountData.account_id,
+        name: accountData.name,
+        email: accountData.email,
+        cpf: accountData.cpf,
+        isPassenger: accountData.is_passenger,
+        isDriver: accountData.is_driver,
+        carPlate: accountData.car_plate,
+        date: accountData.date,
+        verificationCode: accountData.verification_code
+      })
+    )
+  }
 }

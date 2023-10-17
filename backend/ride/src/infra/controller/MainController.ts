@@ -5,6 +5,7 @@ import Signup from '../../application/usecase/Signup'
 import GetRide from '../../application/usecase/GetRide'
 import ListRides from '../../application/usecase/ListRides'
 import ListDetailedRides from '../../application/usecase/ListDetailedRides'
+import ListAccounts from '../../application/usecase/ListAccounts'
 
 // interface adapter
 export default class MainController {
@@ -12,6 +13,7 @@ export default class MainController {
     readonly httpServer: HttpServer,
     signup: Signup,
     getAccount: GetAccount,
+    listAccounts: ListAccounts,
     getRide: GetRide,
     listRides: ListRides,
     listDetailedRides: ListDetailedRides
@@ -29,6 +31,10 @@ export default class MainController {
           status: 'error'
         }
       }
+    })
+
+    httpServer.on('get', '/accounts', function () {
+      return listAccounts.execute()
     })
 
     httpServer.on('get', '/accounts/:accountId', async function (params: any) {

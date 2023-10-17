@@ -18,4 +18,8 @@ export default class AccountDAOMemory implements AccountDAO {
   async getById(accountId: string): Promise<Account | undefined> {
     return this.accounts.find((account: any) => account.accountId === accountId)
   }
+
+  async getAll(): Promise<Account[] | []> {
+    return this.accounts
+  }
 }
