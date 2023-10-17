@@ -8,10 +8,14 @@ export default class AccountHttpClient implements AccountClient {
 
   async save(account: Account): Promise<OperationResult> {
     try {
-      await this.httpClient.request('POST', '/signup', account)
+      const { accountId } = await this.httpClient.request(
+        'POST',
+        '/signup',
+        account
+      )
+      if (!accountId) return OperationResult.fail('Account not created')
       return OperationResult.success()
     } catch (e) {
-      console.log(e)
       return OperationResult.fail(e)
     }
   }

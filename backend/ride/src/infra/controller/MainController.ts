@@ -17,8 +17,18 @@ export default class MainController {
     listDetailedRides: ListDetailedRides
   ) {
     httpServer.on('post', '/signup', async function (params: any, body: any) {
-      const output = await signup.execute(body)
-      return output
+      try {
+        const output = await signup.execute(body)
+        return {
+          ...output,
+          status: 'ok'
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          status: 'error'
+        }
+      }
     })
 
     httpServer.on('get', '/accounts/:accountId', async function (params: any) {
