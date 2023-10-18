@@ -19,4 +19,25 @@ export default class AccountHttpClient implements AccountClient {
       return OperationResult.fail(e)
     }
   }
+
+  async getAll(): Promise<Account[] | []> {
+    try {
+      const result = await this.httpClient.request('GET', '/accounts')
+      return result.map((account: any) =>
+        Account.restore({
+          name: account.name,
+          email: account.email,
+          cpf: account.cpf,
+          isPassenger: account.isPassenger,
+          isDriver: account.isDriver,
+          carPlate: account.carPlate,
+          verificationCode: account.verificationCode,
+          date: new Date(account.date),
+          accountId: account.accountId
+        })
+      )
+    } catch (e) {
+      return []
+    }
+  }
 }
